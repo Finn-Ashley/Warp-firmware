@@ -1,0 +1,22 @@
+diff --git a/src/boot/ksdk1.1.0/warp-kl03-ksdk1.1-boot.c b/src/boot/ksdk1.1.0/warp-kl03-ksdk1.1-boot.c
+index 01cff5f..6736de7 100755
+--- a/src/boot/ksdk1.1.0/warp-kl03-ksdk1.1-boot.c
++++ b/src/boot/ksdk1.1.0/warp-kl03-ksdk1.1-boot.c
+@@ -56,7 +56,7 @@
+ #include "warp.h"
+ 
+ 
+-//#define WARP_FRDMKL03
++define WARP_FRDMKL03
+ 
+ 
+ /*
+@@ -1248,7 +1248,7 @@ main(void)
+ #endif
+ 
+ #ifdef WARP_BUILD_ENABLE_DEVMMA8451Q
+-	initMMA8451Q(	0x1C	/* i2cAddress */,	&deviceMMA8451QState	);
++	initMMA8451Q(	0x1D	/* i2cAddress */,	&deviceMMA8451QState	);
+ #endif
+ 
+ #ifdef WARP_BUILD_ENABLE_DEVLPS25H
