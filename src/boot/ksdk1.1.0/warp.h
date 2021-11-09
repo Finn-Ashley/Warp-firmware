@@ -261,7 +261,7 @@ typedef struct
 	bool			isInitialized;
 
 	uint8_t			i2cAddress;
-	uint8_t			i2cBuffer[kWarpSizesI2cBufferBytes];
+	uint8_t			i2cBuffer[4];
 	uint16_t		operatingVoltageMillivolts;
 } WarpI2CDeviceState;
 
@@ -284,8 +284,8 @@ typedef struct
 typedef struct
 {
 	bool			isInitialized;
-	uint8_t			uartTXBuffer[kWarpSizesUartBufferBytes];
-	uint8_t			uartRXBuffer[kWarpSizesUartBufferBytes];
+	uint8_t			uartTXBuffer[7];
+	uint8_t			uartRXBuffer[7];
 	uint16_t		operatingVoltageMillivolts;
 } WarpUARTDeviceState;
 

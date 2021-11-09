@@ -161,10 +161,26 @@ devSSD1331init(void)
 	 *	of green.
 	 */
 
-	
+	// draw rectangle
+	writeCommand(kSSD1331CommandDRAWRECT);
 
+	// set start and end row and column
+	writeCommand(0x00);
+	writeCommand(0x00);
+	writeCommand(0x5F);
+	writeCommand(0x3F);
 
-//	SEGGER_RTT_WriteString(0, "\r\n\tDone with draw rectangle...\n");
+	// set outline colour
+	writeCommand(0x00);
+	writeCommand(0xFF);
+	writeCommand(0x00);
+
+	// set fill colour
+	writeCommand(0x00);
+	writeCommand(0xFF);
+	writeCommand(0x00);
+
+	SEGGER_RTT_WriteString(0, "\r\n\tDone with draw rectangle (hopefully)...\n");
 
 
 
