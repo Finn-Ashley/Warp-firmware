@@ -169,6 +169,7 @@ typedef enum
 	kWarpDefaultSupplyVoltageMillivoltsBMX055gyro		= 1800,
 	kWarpDefaultSupplyVoltageMillivoltsBMX055mag		= 1800,
 	kWarpDefaultSupplyVoltageMillivoltsMMA8451Q		= 1800,
+	kWarpDefaultSupplyVoltageMillivoltsINA219		= 1800,
 	kWarpDefaultSupplyVoltageMillivoltsLPS25H		= 1800,
 	kWarpDefaultSupplyVoltageMillivoltsHDC1000		= 1800,
 	kWarpDefaultSupplyVoltageMillivoltsMAG3110		= 1800,

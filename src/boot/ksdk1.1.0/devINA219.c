@@ -28,10 +28,9 @@ extern volatile uint32_t		gWarpSupplySettlingDelayMilliseconds;
 
 
 void
-initMMA8451Q(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts)
+initMMA8451Q(const uint8_t i2cAddress)
 {
 	deviceINA219State.i2cAddress			= i2cAddress;
-	deviceINA219State.operatingVoltageMillivolts	= operatingVoltageMillivolts;
 
 	return;
 }
@@ -69,7 +68,6 @@ writeSensorRegisterINA219(uint8_t deviceRegister, uint8_t payload)
 		.baudRate_kbps = gWarpI2cBaudRateKbps
 	};
 
-	warpScaleSupplyVoltage(deviceINA219State.operatingVoltageMillivolts);
 	commandByte[0] = deviceRegister;
 	payloadByte[0] = payload;
 	warpEnableI2Cpins();
@@ -96,7 +94,6 @@ configureSensorINA219(uint8_t payloadF_SETUP, uint8_t payloadCTRL_REG1)
 	WarpStatus	i2cWriteStatus1, i2cWriteStatus2;
 
 
-	warpScaleSupplyVoltage(deviceINA219State.operatingVoltageMillivolts);
 
 	i2cWriteStatus1 = writeSensorRegisterINA219(kWarpSensorConfigurationRegisterINA219_SETUP /* register address F_SETUP */,
 							payloadF_SETUP /* payload: Disable FIFO */
@@ -147,7 +144,6 @@ readSensorRegisterINA219(uint8_t deviceRegister, int numberOfBytes)
 		.baudRate_kbps = gWarpI2cBaudRateKbps
 	};
 
-	warpScaleSupplyVoltage(deviceINA219State.operatingVoltageMillivolts);
 	cmdBuf[0] = deviceRegister;
 	warpEnableI2Cpins();
 
@@ -177,7 +173,6 @@ printSensorDataMMA8451Q(bool hexModeFlag)
 	WarpStatus	i2cReadStatus;
 
 
-	warpScaleSupplyVoltage(deviceINA219State.operatingVoltageMillivolts);
 
 	/*
 	 *	From the MMA8451Q datasheet:
