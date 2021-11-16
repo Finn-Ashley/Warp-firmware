@@ -175,3 +175,41 @@ printSensorDataINA219(bool hexModeFlag)
 		}
 	}
 }
+
+void
+printCurrentDataINA219(bool hexModeFlag)
+{
+	uint16_t	readSensorRegisterValueLSB;
+	uint16_t	readSensorRegisterValueMSB;
+	int16_t		readSensorRegisterValueCombined;
+	int8_t		readSensorRegisterSignedByte;
+	WarpStatus	i2cReadStatus;
+
+
+	for (int i = 0; i < 5; i++){
+		i2cReadStatus = readSensorRegisterMAG3110(kWarpSensorOutputRegisterINA219_CURRENT_MSB, 2 /* numberOfBytes */);
+		readSensorRegisterValueMSB = deviceINA219State.i2cBuffer[0];
+		readSensorRegisterValueLSB = deviceINA219State.i2cBuffer[1];
+		readSensorRegisterValueCombined = ((readSensorRegisterValueMSB & 0xFF) << 8) | (readSensorRegisterValueLSB & 0xFF);
+
+		/*
+		*	NOTE: Here, we don't need to manually sign extend since we are packing directly into an int16_t
+		*/
+
+		if (i2cReadStatus != kWarpStatusOK)
+		{
+			warpPrint(" ----,");
+		}
+		else
+		{
+			if (hexModeFlag)
+			{
+				warpPrint(" 0x%02x 0x%02x,", readSensorRegisterValueMSB, readSensorRegisterValueLSB);
+			}
+			else
+			{
+				warpPrint(" %d,", readSensorRegisterValueCombined);
+			}
+		}
+	}
+}

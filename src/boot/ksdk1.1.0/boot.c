@@ -2091,7 +2091,12 @@ main(void)
 			{
 				warpPrint("Calibrating sensor...");
 				writeSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CALIB_MSB, 0x1000);
-				readSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CURRENT_MSB);
+
+				warpPrint("Calibrated. Starting current measurements...");
+				for (int i = 0; i < 1000; i++){
+					printCurrentDataINA219(true);
+				}
+
 
 			}
 
