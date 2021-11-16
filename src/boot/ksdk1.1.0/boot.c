@@ -1618,7 +1618,7 @@ main(void)
 	 * Add in new sensor initialization
 	 */
 	#if (WARP_BUILD_ENABLE_DEVINA219)
-		initMMA8451Q(	0x40	/* i2cAddress */,		kWarpDefaultSupplyVoltageMillivoltsINA219	);
+		initMMA8451Q(	0x40	/* i2cAddress */);
 	#endif
 
 
