@@ -2061,6 +2061,7 @@ main(void)
 		warpPrint("\r- 's': power up all sensors.\n");
 		warpPrint("\r- 't': dump processor state.\n");
 		warpPrint("\r- 'u': set I2C address.\n");
+		warpPrint("\r- 'y': perform current read using INA219.\n");
 
 		#if (WARP_BUILD_ENABLE_DEVAT45DB)
 			warpPrint("\r- 'R': read bytes from Flash.\n");
@@ -2086,6 +2087,14 @@ main(void)
 			/*
 			 *		Select sensor
 			 */
+			case 'y':
+			{
+				warpPrint("Calibrating sensor...");
+				writeSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CALIB_MSB, 0x1000);
+				readSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CURRENT_MSB);
+
+			}
+
 			case 'a':
 			{
 				warpPrint("\r\tSelect:\n");

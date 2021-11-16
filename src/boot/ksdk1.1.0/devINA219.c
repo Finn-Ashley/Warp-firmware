@@ -36,9 +36,9 @@ initINA219(const uint8_t i2cAddress)
 }
 
 WarpStatus
-writeSensorRegisterINA219(uint8_t deviceRegister, uint8_t payload)
+writeSensorRegisterINA219(uint8_t deviceRegister, uint16_t payload)
 {
-	uint8_t		payloadByte[1], commandByte[1];
+	uint8_t		payloadBytes[2], commandByte[1];
 	i2c_status_t	returnValue;
 
 	switch (deviceRegister)
@@ -63,7 +63,12 @@ writeSensorRegisterINA219(uint8_t deviceRegister, uint8_t payload)
 	};
 
 	commandByte[0] = deviceRegister;
-	payloadByte[0] = payload;
+
+	payloadBytes[0]= payload & 0xff;
+	payloadBytes[1]=(payload >> 8);
+
+
+	payloadBytes[0] = payload;
 	warpEnableI2Cpins();
 
 	returnValue = I2C_DRV_MasterSendDataBlocking(
@@ -71,8 +76,8 @@ writeSensorRegisterINA219(uint8_t deviceRegister, uint8_t payload)
 							&slave,
 							commandByte,
 							1,
-							payloadByte,
-							1,
+							payloadBytes,
+							2,
 							gWarpI2cTimeoutMilliseconds);
 	if (returnValue != kStatus_I2C_Success)
 	{
