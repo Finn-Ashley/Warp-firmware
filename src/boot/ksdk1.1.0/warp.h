@@ -172,7 +172,7 @@ typedef enum
 	kWarpSensorOutputRegisterMAG3110OUT_Z_LSB			= 0x06,
 	kWarpSensorOutputRegisterMAG3110DIE_TEMP			= 0x0F,
 
-	kWarpSensorOutputRegisterINA219_CONFI_MSB			= 0x00,
+	kWarpSensorOutputRegisterINA219_CONFIG_MSB			= 0x00,
 	kWarpSensorOutputRegisterINA219_SHUNT_MSB			= 0x01,
 	kWarpSensorOutputRegisterINA219_BUS_MSB				= 0x02,
 	kWarpSensorOutputRegisterINA219_PWR_MSB				= 0x03,

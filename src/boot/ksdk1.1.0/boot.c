@@ -73,6 +73,11 @@
 	volatile WarpSPIDeviceState			deviceADXL362State;
 #endif
 
+#if (WARP_BUILD_ENABLE_DEVSSD1331)
+	#include "devSSD1331.h"
+	volatile WarpSPIDeviceState			deviceSSD1331State;
+#endif
+
 #if (WARP_BUILD_ENABLE_DEVIS25xP)
 	#include "devIS25xP.h"
 	volatile WarpSPIDeviceState			deviceIS25xPState;
@@ -1618,7 +1623,7 @@ main(void)
 	 * Add in new sensor initialization
 	 */
 	#if (WARP_BUILD_ENABLE_DEVINA219)
-		initMMA8451Q(	0x40	/* i2cAddress */);
+		initINA219(	0x40	/* i2cAddress */);
 	#endif
 
 
@@ -2089,15 +2094,19 @@ main(void)
 			 */
 			case 'y':
 			{
-				warpPrint("Calibrating sensor...");
-				writeSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CALIB_MSB, 0x1000);
+				warpPrint("\nPerforming sensor config...\n");
+				writeSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CONFIG_MSB, 0x0000|0x0000|0x0180|0x0018|0x07);
+				warpPrint("\nCalibrating sensor...\n");
+				writeSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CALIB_MSB, 0x2000);
+				warpPrint("All register output:\n");
+				printSensorDataINA219(false);
+				warpPrint("\nCalibrated. Starting current measurements...\n");
 
-				warpPrint("Calibrated. Starting current measurements...");
-				for (int i = 0; i < 1000; i++){
-					printCurrentDataINA219(true);
+				for (int i = 0; i < 5; i++){
+					printCurrentDataINA219(false);
 				}
 
-
+				break;
 			}
 
 			case 'a':
