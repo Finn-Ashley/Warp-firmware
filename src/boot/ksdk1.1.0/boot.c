@@ -75,6 +75,11 @@
 	volatile WarpSPIDeviceState			deviceADXL362State;
 #endif
 
+#if (WARP_BUILD_ENABLE_DEVSSD1331)
+	#include "devSSD1331.h"
+	volatile WarpSPIDeviceState			deviceSSD1331State;
+#endif
+
 #if (WARP_BUILD_ENABLE_DEVIS25xP)
 	#include "devIS25xP.h"
 	volatile WarpSPIDeviceState			deviceIS25xPState;
@@ -105,6 +110,11 @@
 #if (WARP_BUILD_ENABLE_DEVMMA8451Q)
 	#include "devMMA8451Q.h"
 	volatile WarpI2CDeviceState			deviceMMA8451QState;
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVINA219)
+	#include "devINA219.h"
+	volatile WarpI2CDeviceState			deviceINA219State;
 #endif
 
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
@@ -1607,9 +1617,17 @@ main(void)
 	#endif
 
 	#if (WARP_BUILD_ENABLE_DEVMMA8451Q)
-//		initMMA8451Q(	0x1D	/* i2cAddress */,	&deviceMMA8451QState,		kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
+		// initMMA8451Q(	0x1D	/* i2cAddress */,	&deviceMMA8451QState,		kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
 		initMMA8451Q(	0x1D	/* i2cAddress */,		kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
 	#endif
+
+	/*
+	 * Add in new sensor initialization
+	 */
+	#if (WARP_BUILD_ENABLE_DEVINA219)
+		initINA219(	0x40	/* i2cAddress */);
+	#endif
+
 
 	#if (WARP_BUILD_ENABLE_DEVLPS25H)
 		initLPS25H(	0x5C	/* i2cAddress */,	&deviceLPS25HState,		kWarpDefaultSupplyVoltageMillivoltsLPS25H	);
@@ -2019,12 +2037,7 @@ main(void)
 		}
 	#endif
 
-	/* 
-	 * Place the intialisation of the OLED screen
-	 */
-
 	devSSD1331init();
-
 	while (1)
 	{
 		/*
@@ -2056,6 +2069,11 @@ main(void)
 		warpPrint("\r- 't': dump processor state.\n");
 		warpPrint("\r- 'u': set I2C address.\n");
 
+		// New command if current sensor attached
+		#if (WARP_BUILD_ENABLE_DEVINA219)
+			warpPrint("\r- 'y': perform current read using INA219.\n");
+		#endif
+
 		#if (WARP_BUILD_ENABLE_DEVAT45DB)
 			warpPrint("\r- 'R': read bytes from Flash.\n");
 			warpPrint("\r- 'F': write bytes to Flash.\n");
@@ -2077,6 +2095,35 @@ main(void)
 
 		switch (key)
 		{
+			
+			// Add a new case to the warp menu for interacting with the INA219
+			case 'y':
+			{
+				// send config value
+				warpPrint("\nPerforming sensor config, sending value %d ...\n", 0x0000|0x0000|0x0180|0x0018|0x07);
+				writeSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CONFIG_MSB, 0x0000|0x0000|0x0180|0x0018|0x07);
+
+				// send calibration value
+				warpPrint("\nPerforming sensor calibration, sending value %d ...\n", 0x2000);
+				writeSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CALIB_MSB, 0x2000);
+
+				// print all registers to check we see the just send config and calib values
+				warpPrint("\nAll register output:\n");
+				printSensorDataINA219(false);
+
+				// take 1000 current measurements in .csv format
+				warpPrint("\nCalibrated. Starting current measurements:\n");
+				take1000CurrentMeasurements(false);
+				
+				// Uncomment to take 5 singular measurements for debugging purposes
+				// for (int i = 0; i < 5; i++){
+				//	warpPrint("\nReading %d: ", i);
+				//	printCurrentDataINA219(false);
+				//}
+
+				break;
+			}
+
 			/*
 			 *		Select sensor
 			 */

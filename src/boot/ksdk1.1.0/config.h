@@ -79,6 +79,7 @@
 	#define		WARP_BUILD_ENABLE_DEVSI4705		0
 	#define		WARP_BUILD_ENABLE_DEVSI7021		0
 	#define		WARP_BUILD_ENABLE_DEVTCS34725		0
+	#define		WARP_BUILD_ENABLE_DEVINA219		0
 #elif (WARP_BUILD_ENABLE_FRDMKL03)
 	#define		WARP_BUILD_ENABLE_DEVADXL362		0
 	#define		WARP_BUILD_ENABLE_DEVAMG8834		0
@@ -101,6 +102,8 @@
 	#define		WARP_BUILD_ENABLE_DEVSI4705		0
 	#define		WARP_BUILD_ENABLE_DEVSI7021		0
 	#define		WARP_BUILD_ENABLE_DEVTCS34725		0
+	#define		WARP_BUILD_ENABLE_DEVINA219		1
+	#define		WARP_BUILD_ENABLE_DEVSSD1331	1
 #else
 	/*
 	 *	Otherwise: Edit these to set which code paths are activated in the firmware compilation
@@ -126,6 +129,7 @@
 	#define		WARP_BUILD_ENABLE_DEVSI4705		0
 	#define		WARP_BUILD_ENABLE_DEVSI7021		0
 	#define		WARP_BUILD_ENABLE_DEVTCS34725		0
+	#define		WARP_BUILD_ENABLE_DEVINA219		0
 #endif
 
 typedef enum
@@ -166,6 +170,7 @@ typedef enum
 	kWarpDefaultSupplyVoltageMillivoltsBMX055gyro		= 1800,
 	kWarpDefaultSupplyVoltageMillivoltsBMX055mag		= 1800,
 	kWarpDefaultSupplyVoltageMillivoltsMMA8451Q		= 1800,
+	kWarpDefaultSupplyVoltageMillivoltsINA219		= 1800,
 	kWarpDefaultSupplyVoltageMillivoltsLPS25H		= 1800,
 	kWarpDefaultSupplyVoltageMillivoltsHDC1000		= 1800,
 	kWarpDefaultSupplyVoltageMillivoltsMAG3110		= 1800,
