@@ -2066,7 +2066,11 @@ main(void)
 		warpPrint("\r- 's': power up all sensors.\n");
 		warpPrint("\r- 't': dump processor state.\n");
 		warpPrint("\r- 'u': set I2C address.\n");
-		warpPrint("\r- 'y': perform current read using INA219.\n");
+
+		// New command if current sensor attached
+		#if (WARP_BUILD_ENABLE_DEVINA219)
+			warpPrint("\r- 'y': perform current read using INA219.\n");
+		#endif
 
 		#if (WARP_BUILD_ENABLE_DEVAT45DB)
 			warpPrint("\r- 'R': read bytes from Flash.\n");
@@ -2089,26 +2093,38 @@ main(void)
 
 		switch (key)
 		{
-			/*
-			 *		Select sensor
-			 */
+			
+			// Add a new case to the warp menu for interacting with the INA219
 			case 'y':
 			{
-				warpPrint("\nPerforming sensor config...\n");
+				// send config value
+				warpPrint("\nPerforming sensor config, sending value %d ...\n", 0x0000|0x0000|0x0180|0x0018|0x07);
 				writeSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CONFIG_MSB, 0x0000|0x0000|0x0180|0x0018|0x07);
-				warpPrint("\nCalibrating sensor...\n");
-				writeSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CALIB_MSB, 0x2000);
-				warpPrint("All register output:\n");
-				printSensorDataINA219(false);
-				warpPrint("\nCalibrated. Starting current measurements...\n");
 
-				for (int i = 0; i < 5; i++){
-					printCurrentDataINA219(false);
-				}
+				// send calibration value
+				warpPrint("\nPerforming sensor calibration, sending value %d ...\n", 0x2000);
+				writeSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CALIB_MSB, 0x2000);
+
+				// print all registers to check we see the just send config and calib values
+				warpPrint("\nAll register output:\n");
+				printSensorDataINA219(false);
+
+				// take 1000 current measurements in .csv format
+				warpPrint("\nCalibrated. Starting current measurements:\n");
+				take1000CurrentMeasurements(false);
+				
+				// Uncomment to take 5 singular measurements for debugging purposes
+				// for (int i = 0; i < 5; i++){
+				//	warpPrint("\nReading %d: ", i);
+				//	printCurrentDataINA219(false);
+				//}
 
 				break;
 			}
 
+			/*
+			 *		Select sensor
+			 */
 			case 'a':
 			{
 				warpPrint("\r\tSelect:\n");

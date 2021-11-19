@@ -64,11 +64,15 @@ writeSensorRegisterINA219(uint8_t deviceRegister, uint16_t payload)
 
 	commandByte[0] = deviceRegister;
 
-	payloadBytes[0]= payload & 0xff;
-	payloadBytes[1]=(payload >> 8);
+	payloadBytes[1]= payload & 0xff;
+	payloadBytes[0]= (payload >> 8);
 
+	warpPrint("\n\n------- BYTE CONVERSION -------\n");
+	warpPrint("uint16_t payload recieved: %d\n", payload);
+	warpPrint("payloadBytes[1] post conversion: %d\n", payloadBytes[1]);
+	warpPrint("payloadBytes[0] post conversion: %d\n", payloadBytes[0]);
+	warpPrint("-----------------------\n\n");
 
-	payloadBytes[0] = payload;
 	warpEnableI2Cpins();
 
 	returnValue = I2C_DRV_MasterSendDataBlocking(
@@ -148,7 +152,8 @@ printSensorDataINA219(bool hexModeFlag)
 	WarpStatus	i2cReadStatus;
 
 
-	for (int i = 0; i < 5; i++){
+	for (uint8_t i = 0; i < 6; i++){
+		warpPrint("\nReading from %d: ", i);
 		i2cReadStatus = readSensorRegisterINA219(i, 2 /* numberOfBytes */);
 		readSensorRegisterValueMSB = deviceINA219State.i2cBuffer[0];
 		readSensorRegisterValueLSB = deviceINA219State.i2cBuffer[1];
@@ -170,7 +175,7 @@ printSensorDataINA219(bool hexModeFlag)
 			}
 			else
 			{
-				warpPrint(" %d,", readSensorRegisterValueCombined/20);
+				warpPrint(" %d,", readSensorRegisterValueCombined);
 			}
 		}
 	}
@@ -185,8 +190,6 @@ printCurrentDataINA219(bool hexModeFlag)
 	// int8_t		readSensorRegisterSignedByte;
 	WarpStatus	i2cReadStatus;
 
-
-	for (int i = 0; i < 5; i++){
 		i2cReadStatus = readSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CURRENT_MSB, 2 /* numberOfBytes */);
 		readSensorRegisterValueMSB = deviceINA219State.i2cBuffer[0];
 		readSensorRegisterValueLSB = deviceINA219State.i2cBuffer[1];
@@ -208,8 +211,46 @@ printCurrentDataINA219(bool hexModeFlag)
 			}
 			else
 			{
-				warpPrint(" %d \n,", readSensorRegisterValueCombined);
+				readSensorRegisterValueCombined = (readSensorRegisterValueCombined/20)*50;
+				warpPrint("%d\n,", readSensorRegisterValueCombined);
 			}
 		}
+}
+
+void
+take1000CurrentMeasurements(bool hexModeFlag)
+{
+	uint16_t	readSensorRegisterValueLSB;
+	uint16_t	readSensorRegisterValueMSB;
+	int16_t		readSensorRegisterValueCombined;
+	// int8_t		readSensorRegisterSignedByte;
+	WarpStatus	i2cReadStatus;
+
+		for (int i = 0; i < 1000; i++){
+			i2cReadStatus = readSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CURRENT_MSB, 2 /* numberOfBytes */);
+			readSensorRegisterValueMSB = deviceINA219State.i2cBuffer[0];
+			readSensorRegisterValueLSB = deviceINA219State.i2cBuffer[1];
+			readSensorRegisterValueCombined = ((readSensorRegisterValueMSB & 0xFF) << 8) | (readSensorRegisterValueLSB & 0xFF);
+
+			/*
+			*	NOTE: Here, we don't need to manually sign extend since we are packing directly into an int16_t
+			*/
+
+			if (i2cReadStatus != kWarpStatusOK)
+			{
+				warpPrint(" ----,");
+			}
+			else
+			{
+				if (hexModeFlag)
+				{
+					warpPrint(" 0x%02x 0x%02x,", readSensorRegisterValueMSB, readSensorRegisterValueLSB);
+				}
+				else
+				{
+					readSensorRegisterValueCombined = (readSensorRegisterValueCombined*50);
+					warpPrint("%d\n", readSensorRegisterValueCombined);
+				}
+			}
 	}
 }
