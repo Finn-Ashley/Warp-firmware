@@ -105,13 +105,6 @@ readSensorRegisterINA219(uint8_t deviceRegister, int numberOfBytes)
 		.baudRate_kbps = gWarpI2cBaudRateKbps
 	};
 
-	/*
-	 *	Steps (Repeated single-byte read. See Section 4.2.2 of MAG3110 manual.):
-	 *
-	 *	(1) Write transaction beginning with start condition, slave address, and pointer address.
-	 *
-	 *	(2) Read transaction beginning with start condition, followed by slave address, and read 1 byte payload
-	*/
 
 	cmdBuf[0] = deviceRegister;
 	warpEnableI2Cpins();
