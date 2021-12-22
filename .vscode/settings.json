@@ -1,0 +1,5 @@
+{
+    "files.associations": {
+        "fsl_os_abstraction.h": "c"
+    }
+}

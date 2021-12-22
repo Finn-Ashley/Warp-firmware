@@ -80,6 +80,10 @@
 	volatile WarpSPIDeviceState			deviceSSD1331State;
 #endif
 
+#if (WARP_BUILD_ENABLE_DEVADC)
+	#include "devADC.h"
+#endif
+
 #if (WARP_BUILD_ENABLE_DEVIS25xP)
 	#include "devIS25xP.h"
 	volatile WarpSPIDeviceState			deviceIS25xPState;
@@ -2038,6 +2042,7 @@ main(void)
 	#endif
 
 	devSSD1331init();
+	ADCinit();
 	while (1)
 	{
 		/*

@@ -23,8 +23,13 @@ volatile int32_t adc_readings[NUMBER_OF_STORED_READINGS];
 // volatile int32_t* oldest_reading = &adc_readings[0];
 int oldest_reading_index = 0;
 
+const uint32_t instance = 0U;
+const uint32_t chnGroup = 0U;
+const uint8_t chn = 0U;
 
-void ADCinnit(uint32_t instance, uint32_t chnGroup, uint8_t chn)
+
+
+void ADCinit(void)
 {
 
     #if FSL_FEATURE_ADC16_HAS_CALIBRATION
@@ -72,7 +77,7 @@ void ADCinnit(uint32_t instance, uint32_t chnGroup, uint8_t chn)
  * Wrapper function to allow reading from ADC using only
  * one line downstream.
  */
-int32_t read_from_adc(uint32_t instance, uint32_t chnGroup){
+int32_t read_from_adc(void){
     ADC16_DRV_WaitConvDone(instance, chnGroup);
     uint16_t MyAdcValue = ADC16_DRV_GetConvValueRAW(instance, chnGroup);
     int32_t converted_adc_read = ADC16_DRV_ConvRAWData(MyAdcValue, false, kAdcResolutionBitOfSingleEndAs12);
@@ -85,11 +90,11 @@ int32_t read_from_adc(uint32_t instance, uint32_t chnGroup){
  * looping round and overwriting old data.
  */
 
-void ADC_burn_in(uint32_t instance, uint32_t chnGroup){
+void ADC_burn_in(void){
 
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
         // wait for and fetch conversion
-        converted_adc_read = read_from_adc(instance, chnGroup);
+        converted_adc_read = read_from_adc(void);
         adc_readings[i] = converted_adc_read;
     }
 }
@@ -97,11 +102,11 @@ void ADC_burn_in(uint32_t instance, uint32_t chnGroup){
 /*
  * Fetches new data point from ADC and overwrites the oldest prior point to store.
  */
-void update_adc_data(uint32_t instance, uint32_t chnGroup){
+void update_adc_data(void){
     // I want this to fetch the latest ADC value, convert it and then put it in 
     // into some array of fixed length, overwriting oldest data value if full
 
-    int32_t new_adc_read = read_from_adc(uint32_t instance, uint32_t chnGroup)
+    int32_t new_adc_read = read_from_adc(void)
     // *oldest_reading = new_adc_read;
     adc_readings[oldest_reading_index] = new_adc_read;
     oldest_reading_index = (oldest_reading + 1)%NUMBER_OF_STORED_READINGS
