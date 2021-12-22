@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "segger_rtt.h": "c"
+        "segger_rtt.h": "c",
+        "devssd1331.h": "c"
     }
 }

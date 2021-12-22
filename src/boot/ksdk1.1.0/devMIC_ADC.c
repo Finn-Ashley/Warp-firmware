@@ -11,7 +11,7 @@
 #include "SEGGER_RTT.h"
 #include "gpio_pins.h"
 #include "warp.h"
-#include "devADC.h"
+#include "devMIC_ADC.h"
 
 #include "board.h"
 #include "fsl_os_abstraction.h"

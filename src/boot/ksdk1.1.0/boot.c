@@ -62,13 +62,20 @@
 #include "gpio_pins.h"
 #include "SEGGER_RTT.h"
 
-#include "devSSD1331.h"
+
 
 
 #define							kWarpConstantStringI2cFailure		"\rI2C failed, reg 0x%02x, code %d\n"
 #define							kWarpConstantStringErrorInvalidVoltage	"\rInvalid supply voltage [%d] mV!"
 #define							kWarpConstantStringErrorSanity		"\rSanity check failed!"
 
+#if (WARP_BUILD_ENABLE_DEVSSD1331)
+	#include "devSSD1331.h"
+#endif
+
+#if (WARP_BUILD_ENABLE_MIC_ADC)
+	#include "devMIC_ADC.h"
+#endif
 
 #if (WARP_BUILD_ENABLE_DEVADXL362)
 	#include "devADXL362.h"
@@ -2024,7 +2031,7 @@ main(void)
 	 */
 
 	devSSD1331init();
-
+	ADCinit();
 	while (1)
 	{
 		/*
