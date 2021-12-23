@@ -35,7 +35,7 @@
 enum _gpio_pins
 {
 	kWarpPinUnusedPTA0			= GPIO_MAKE_PIN(HW_GPIOA, 0),	/*	PTA0: Reserved for SWD CLK	*/
-	kWarpPinUnusedPTA1			= GPIO_MAKE_PIN(HW_GPIOA, 1),	/*	PTA1: Reserved for SWD RESET_B	*/
+	//kWarpPinUnusedPTA1			= GPIO_MAKE_PIN(HW_GPIOA, 1),	/*	PTA1: Reserved for SWD RESET_B	*/
 	kWarpPinUnusedPTA2			= GPIO_MAKE_PIN(HW_GPIOA, 2),	/*	PTA2: Reserved for SWD DIO	*/
 	kWarpPinEXTAL0				= GPIO_MAKE_PIN(HW_GPIOA, 3),	/*	PTA3: Reserved for EXTAL0	*/
 	kWarpPinXTAL0				= GPIO_MAKE_PIN(HW_GPIOA, 4),	/*	PTA4: Reserved for XTAL0	*/
@@ -56,7 +56,7 @@ enum _gpio_pins
 		kWarpPinAT45DB_SPI_nCS		= GPIO_MAKE_PIN(HW_GPIOA, 9),
 	#endif
 
-	kWarpPinISL23415_SPI_nCS		= GPIO_MAKE_PIN(HW_GPIOA, 12),
+	kWarpPinISL23415_SPI_nCS		= GPIO_MAKE_PIN(HW_GPIOA, 1),
 
 	#if (WARP_BUILD_ENABLE_GLAUX_VARIANT)
 		kGlauxPinLED			= GPIO_MAKE_PIN(HW_GPIOB, 0),

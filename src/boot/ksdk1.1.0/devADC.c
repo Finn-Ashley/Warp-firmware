@@ -13,12 +13,12 @@
 #include "warp.h"
 #include "devADC.h"
 
-#include "board.h"
+// #include "board.h"
 #include "fsl_os_abstraction.h"
 #include "fsl_debug_console.h"
 #include "fsl_adc16_driver.h"
 
-volatile const int NUMBER_OF_STORED_READINGS = 1024;
+#define NUMBER_OF_STORED_READINGS 1024
 volatile int32_t adc_readings[NUMBER_OF_STORED_READINGS];
 // volatile int32_t* oldest_reading = &adc_readings[0];
 int oldest_reading_index = 0;
@@ -94,8 +94,7 @@ void ADC_burn_in(void){
 
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
         // wait for and fetch conversion
-        converted_adc_read = read_from_adc(void);
-        adc_readings[i] = converted_adc_read;
+        adc_readings[i] = read_from_adc();
     }
 }
 
@@ -106,8 +105,8 @@ void update_adc_data(void){
     // I want this to fetch the latest ADC value, convert it and then put it in 
     // into some array of fixed length, overwriting oldest data value if full
 
-    int32_t new_adc_read = read_from_adc(void)
+    int32_t new_adc_read = read_from_adc();
     // *oldest_reading = new_adc_read;
     adc_readings[oldest_reading_index] = new_adc_read;
-    oldest_reading_index = (oldest_reading + 1)%NUMBER_OF_STORED_READINGS
+    oldest_reading_index = (oldest_reading_index + 1)%NUMBER_OF_STORED_READINGS;
 }
