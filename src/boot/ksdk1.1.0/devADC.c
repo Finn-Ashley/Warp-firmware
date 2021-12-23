@@ -25,7 +25,7 @@ int oldest_reading_index = 0;
 
 const uint32_t instance = 0U;
 const uint32_t chnGroup = 0U;
-const uint8_t chn = 0U;
+const uint8_t chn = 8U;
 
 
 
