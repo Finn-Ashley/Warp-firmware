@@ -168,8 +168,8 @@ devSSD1331init(void)
 	// set start and end row and column
 	writeCommand(0x00);
 	writeCommand(0x00);
-	writeCommand(0x5F);
-	writeCommand(0x3F);
+	writeCommand(0x5F); // col max
+	writeCommand(0x3F); // row max
 
 	// set outline colour
 	writeCommand(0x00);
@@ -185,3 +185,50 @@ devSSD1331init(void)
 
 	return 0;
 }
+
+void draw_frequency_bar(int start, int end, int height, int colour){
+	// set start and end row and column
+	writeCommand(start); // start col
+	writeCommand(0x00); // start row
+	writeCommand(end); // end col
+	writeCommand(height); // end row
+
+	// set outline colour
+	writeCommand(0x00);
+	writeCommand(colour);
+	writeCommand(0x00);
+
+	// set fill colour
+	writeCommand(0x00);
+	writeCommand(colour);
+	writeCommand(0x00);
+}
+
+void draw_frequency_chart(fftw_complex *bar_heights){
+
+	int number_of_bins = sizeof(bar_heights)/sizeof(bar_heights[0]);
+	int bin_width = floor(0x5F / number_of_bins);
+
+	int max = 0;
+	int location;
+	for (int c = 0; c < number_of_bins; c++){
+        if (bar_heights[c] > max){
+        	max = bar_heights[c];
+        	location = c;
+		}
+    }
+
+	// clear screen before redrawing
+	writeCommand(kSSD1331CommandCLEAR);
+	writeCommand(0x00);
+	writeCommand(0x00);
+	writeCommand(0x5F);
+	writeCommand(0x3F);
+
+	for(int i = 0; i < number_of_bins; i++){
+		int normalised_height = (bar_heights[i]/max)*(0x3F);
+		int start = i * bin_width;
+		int end = start + bin_width;
+		draw_frequency_bar(start, end, normalised_height, rand() % 256);
+	}
+ }

@@ -77,9 +77,8 @@ void ADCinit(void)
     //    warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n", adc_readings[i]);
     //}
 
-    heap_adc_readings = (double*)malloc(NUMBER_OF_STORED_READINGS * sizeof(int32_t));
+    heap_adc_readings = malloc(NUMBER_OF_STORED_READINGS * sizeof(double));
     warpPrint("Address: %p\n", (void*)heap_adc_readings);
-    adc_readings_ptr = heap_adc_readings;
     populate_adc_heap();
     warpPrint("Populated...");
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
