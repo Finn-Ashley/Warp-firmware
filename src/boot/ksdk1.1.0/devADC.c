@@ -99,6 +99,7 @@ void ADC_burn_in(void){
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
         // wait for and fetch conversion
         adc_readings[i] = read_from_adc();
+        delay(0.5);
     }
 }
 
@@ -114,4 +115,17 @@ void update_adc_data(void){
     // *oldest_reading = new_adc_read;
     adc_readings[oldest_reading_index] = new_adc_read;
     oldest_reading_index = (oldest_reading_index + 1)%NUMBER_OF_STORED_READINGS;
+}
+
+void delay(int number_of_seconds)
+{
+    // Converting time into milli_seconds
+    int milli_seconds = 1000 * number_of_seconds;
+  
+    // Storing start time
+    clock_t start_time = clock();
+  
+    // looping till required time is not achieved
+    while (clock() < start_time + milli_seconds)
+        ;
 }
