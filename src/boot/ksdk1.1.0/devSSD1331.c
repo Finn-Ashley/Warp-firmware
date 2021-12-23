@@ -161,6 +161,7 @@ devSSD1331init(void)
 	 *	Any post-initialization drawing commands go here.
 	 */
 	
+	warpPrint("Should be drawing....");
 	// draw rectangle
 	writeCommand(kSSD1331CommandDRAWRECT);
 

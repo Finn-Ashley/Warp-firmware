@@ -2041,7 +2041,7 @@ main(void)
 		}
 	#endif
 
-	devSSD1331init();
+	//devSSD1331init();
 	ADCinit();
 	while (1)
 	{

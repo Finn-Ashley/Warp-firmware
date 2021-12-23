@@ -12,13 +12,13 @@
 #include "gpio_pins.h"
 #include "warp.h"
 #include "devADC.h"
-
+#include "time.h"
 // #include "board.h"
 #include "fsl_os_abstraction.h"
 #include "fsl_debug_console.h"
 #include "fsl_adc16_driver.h"
 
-#define NUMBER_OF_STORED_READINGS 1024
+#define NUMBER_OF_STORED_READINGS 64
 volatile int32_t adc_readings[NUMBER_OF_STORED_READINGS];
 // volatile int32_t* oldest_reading = &adc_readings[0];
 int oldest_reading_index = 0;
@@ -71,6 +71,10 @@ void ADCinit(void)
         ADC16_DRV_ConvRAWData(MyAdcValue, false,
         kAdcResolutionBitOfSingleEndAs12) );
     }
+    ADC_burn_in();
+    while(true){
+        update_adc_data();
+    }
 }
 
 /*
@@ -106,6 +110,7 @@ void update_adc_data(void){
     // into some array of fixed length, overwriting oldest data value if full
 
     int32_t new_adc_read = read_from_adc();
+    warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n", new_adc_read);
     // *oldest_reading = new_adc_read;
     adc_readings[oldest_reading_index] = new_adc_read;
     oldest_reading_index = (oldest_reading_index + 1)%NUMBER_OF_STORED_READINGS;
