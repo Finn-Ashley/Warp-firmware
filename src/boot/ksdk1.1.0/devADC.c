@@ -71,11 +71,8 @@ void ADCinit(void)
         kAdcResolutionBitOfSingleEndAs12) );
     }
     ADC_burn_in();
-    while(true){
-        update_adc_data();
-        for(int i = 0; i < 10000; i++){
-            ;
-        }
+    for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
+        warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n", adc_readings[i]);
     }
 }
 
