@@ -26,7 +26,8 @@ const uint32_t instance = 0U;
 const uint32_t chnGroup = 0U;
 const uint8_t chn = 8U;
 
-
+double* heap_adc_readings = malloc(NUMBER_OF_STORED_READINGS * sizeof(int32_t));
+double* adc_readings_ptr = heap_adc_readings;
 
 void ADCinit(void)
 {
@@ -70,10 +71,16 @@ void ADCinit(void)
         ADC16_DRV_ConvRAWData(MyAdcValue, false,
         kAdcResolutionBitOfSingleEndAs12) );
     }
-    ADC_burn_in();
+    //ADC_burn_in();
+    //for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
+    //    warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n", adc_readings[i]);
+    //}
+    populate_adc_heap();
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
-        warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n", adc_readings[i]);
+        warpPrint("%d", *adc_readings_ptr);
+        adc_readings_ptr++;
     }
+
 }
 
 /*
@@ -113,4 +120,25 @@ void update_adc_data(void){
     // *oldest_reading = new_adc_read;
     adc_readings[oldest_reading_index] = new_adc_read;
     oldest_reading_index = (oldest_reading_index + 1)%NUMBER_OF_STORED_READINGS;
+}
+
+void populate_adc_heap(void){
+    for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
+        int32_t new_reading = read_from_adc(); 
+        *adc_readings_ptr = (double)new_reading;
+        adc_readings_ptr++;
+    }
+    adc_readings_ptr = heap_adc_readings;
+}
+
+void fetch_adc_to_heap(void){
+
+    int32_t new_reading = read_from_adc();
+    heap_adc_readings = realloc(heap_adc_readings, NUMBER_OF_STORED_READINGS * sizeof(int32_t) + 1);
+    adc_readings_ptr = heap_adc_readings;
+    adc_readings_ptr += NUMBER_OF_STORED_READINGS;
+    *adc_readings_ptr = (double) new_reading;
+
+    heap_adc_readings++;
+    heap_adc_readings = realloc(heap_adc_readings, NUMBER_OF_STORED_READINGS * sizeof(int32_t));
 }
