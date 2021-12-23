@@ -26,8 +26,9 @@ const uint32_t instance = 0U;
 const uint32_t chnGroup = 0U;
 const uint8_t chn = 8U;
 
-double* heap_adc_readings = malloc(NUMBER_OF_STORED_READINGS * sizeof(int32_t));
-double* adc_readings_ptr = heap_adc_readings;
+double* heap_adc_readings;
+double* adc_readings_ptr;
+
 
 void ADCinit(void)
 {
@@ -75,7 +76,11 @@ void ADCinit(void)
     //for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
     //    warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n", adc_readings[i]);
     //}
+
+    heap_adc_readings = malloc(NUMBER_OF_STORED_READINGS * sizeof(int32_t));
+    adc_readings_ptr = heap_adc_readings;
     populate_adc_heap();
+    warpPrint("Populated...");
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
         warpPrint("%d", *adc_readings_ptr);
         adc_readings_ptr++;
@@ -124,8 +129,11 @@ void update_adc_data(void){
 
 void populate_adc_heap(void){
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
-        int32_t new_reading = read_from_adc(); 
-        *adc_readings_ptr = (double)new_reading;
+        warpPrint("Populating %d...\n", i);
+        double new_reading = (double)read_from_adc();
+        warpPrint("Got new value.");
+        *adc_readings_ptr = new_reading;
+        warpPrint("Value recast and put in memory.");
         adc_readings_ptr++;
     }
     adc_readings_ptr = heap_adc_readings;
