@@ -17,10 +17,8 @@
 #include "fsl_debug_console.h"
 #include "fsl_adc16_driver.h"
 
-#define NUMBER_OF_STORED_READINGS 16
-volatile int32_t adc_readings[NUMBER_OF_STORED_READINGS];
-// volatile int32_t* oldest_reading = &adc_readings[0];
-int oldest_reading_index = 0;
+#define NUMBER_OF_STORED_READINGS 4
+volatile double adc_readings[NUMBER_OF_STORED_READINGS];
 
 const uint32_t instance = 0U;
 const uint32_t chnGroup = 0U;
@@ -77,12 +75,12 @@ void ADCinit(void)
     //    warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n", adc_readings[i]);
     //}
 
-    heap_adc_readings = malloc(NUMBER_OF_STORED_READINGS * sizeof(double));
+    // heap_adc_readings = OSA_MemAlloc(NUMBER_OF_STORED_READINGS * sizeof(double));
     warpPrint("Address: %p\n", (void*)heap_adc_readings);
-    populate_adc_heap();
+    ADC_burn_in();
     warpPrint("Populated...");
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
-        warpPrint("%d", heap_adc_readings[i]);
+        warpPrint("%f", adc_readings[i]);
     }
 
 }
@@ -108,7 +106,7 @@ void ADC_burn_in(void){
 
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
         // wait for and fetch conversion
-        adc_readings[i] = read_from_adc();
+        adc_readings[i] = (double)read_from_adc();
     }
 }
 
@@ -121,9 +119,14 @@ void update_adc_data(void){
 
     int32_t new_adc_read = read_from_adc();
     warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n", new_adc_read);
-    // *oldest_reading = new_adc_read;
-    adc_readings[oldest_reading_index] = new_adc_read;
-    oldest_reading_index = (oldest_reading_index + 1)%NUMBER_OF_STORED_READINGS;
+
+    // shift data in array left by one to free up most recent datapoint
+    for(int i = 0; NUMBER_OF_STORED_READINGS - 2; i++){
+        adc_readings[i] = adc_readings[i+1];
+    }
+
+    // add in new datapoint
+    adc_readings[NUMBER_OF_STORED_READINGS - 1] = (double)new_adc_read;
 }
 
 void populate_adc_heap(void){

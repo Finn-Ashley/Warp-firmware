@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "fsl_os_abstraction.h": "c"
+        "fsl_os_abstraction.h": "c",
+        "complex.h": "c",
+        "config.h": "c",
+        "fft.h": "c"
     }
 }
