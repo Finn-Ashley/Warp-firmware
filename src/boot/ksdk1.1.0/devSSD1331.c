@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <math.h>
 
 /*
  *	config.h needs to come first
@@ -206,7 +207,7 @@ void draw_frequency_bar(int start, int end, int height, int colour){
 
 void draw_frequency_chart(double *bar_heights){
 
-	int number_of_bins = sizeof(bar_heights)/sizeof(bar_heights[0]);
+	int number_of_bins = sizeof(&bar_heights)/sizeof(bar_heights[0]);
 	int bin_width = floor(0x5F / number_of_bins);
 
 	int max = 0;

@@ -77,6 +77,7 @@
 
 #if (WARP_BUILD_ENABLE_DEVSSD1331)
 	#include "devSSD1331.h"
+	#include "main_loop.h"
 	volatile WarpSPIDeviceState			deviceSSD1331State;
 #endif
 
@@ -2042,7 +2043,8 @@ main(void)
 	#endif
 
 	//devSSD1331init();
-	ADCinit();
+	//ADCinit();
+	main_loop();
 	while (1)
 	{
 		/*
