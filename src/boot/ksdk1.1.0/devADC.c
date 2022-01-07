@@ -28,6 +28,7 @@ double* heap_adc_readings;
 double* adc_readings_ptr;
 */
 
+double adc_readings[NUMBER_OF_STORED_READINGS];
 
 void ADCinit(void)
 {

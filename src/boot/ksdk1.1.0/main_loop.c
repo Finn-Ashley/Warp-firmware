@@ -32,7 +32,7 @@
 // draw screen based on that
 void main_loop(void){
 
-    volatile double adc_fft_copy[NUMBER_OF_STORED_READINGS];
+    double adc_fft_copy[NUMBER_OF_STORED_READINGS];
     int n, ip[NMAXSQRT + 2];
     double a[NMAX + 1], w[NMAX * 5 / 4];
 
