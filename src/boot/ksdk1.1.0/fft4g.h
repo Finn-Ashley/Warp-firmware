@@ -5,3 +5,4 @@ void cftfsub(int n, double *a, double *w);
 void cftbsub(int n, double *a, double *w);
 void rftfsub(int n, double *a, int nc, double *c);
 void rftbsub(int n, double *a, int nc, double *c);
+void rdft(int n, int isgn, double *a, int *ip, double *w);

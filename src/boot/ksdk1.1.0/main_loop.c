@@ -34,7 +34,7 @@ void main_loop(void){
 
     double adc_fft_copy[NUMBER_OF_STORED_READINGS];
     int n, ip[NMAXSQRT + 2];
-    double a[NMAX + 1], w[NMAX * 5 / 4];
+    double w[NMAX * 5 / 4];
 
     n = NUMBER_OF_STORED_READINGS;
     ip[0] = 0;
