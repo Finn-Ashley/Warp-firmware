@@ -1,4 +1,4 @@
-#define NUMBER_OF_STORED_READINGS 16
+#define NMAX 16
 
 void ADCinit(void);
 int32_t read_from_adc(void);
@@ -7,4 +7,4 @@ void update_adc_data(void);
 void fetch_adc_to_heap(void);
 void populate_adc_heap(void);
 
-extern double adc_readings[NUMBER_OF_STORED_READINGS];
+extern double adc_readings[NMAX + 1];

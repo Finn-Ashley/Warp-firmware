@@ -40,6 +40,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <math.h>
+//#include <avr/pgmspace.h>
 
 /*
  *	config.h needs to come first
@@ -56,16 +58,20 @@
 #include "fsl_mcglite_hal.h"
 #include "fsl_port_hal.h"
 #include "fsl_lpuart_driver.h"
-#include "glaux.h"
 #include "warp.h"
+
 #include "errstrs.h"
 #include "gpio_pins.h"
 #include "SEGGER_RTT.h"
+
+#include "fft4g.h"
+
 
 #ifndef NMAX
 #define NMAX 16
 #define NMAXSQRT 4
 #endif
+
 
 #if (WARP_BUILD_ENABLE_DEVSSD1331)
 	#include "devSSD1331.h"
@@ -401,29 +407,25 @@ main(void)
 
 	devSSD1331init();
 
-	double adc_fft_copy[NUMBER_OF_STORED_READINGS];
-    int n, ip[NMAXSQRT + 2];
+	double adc_fft_copy[NMAX + 1];
+    int ip[NMAXSQRT + 2];
     double w[NMAX * 5 / 4];
 
-	n = NUMBER_OF_STORED_READINGS;
+	// n = NUMBER_OF_STORED_READINGS;
     ip[0] = 0;
 
     ADCinit();
+
     while(true){
-        update_adc_data();
+		update_adc_data();
 
-        memcpy(adc_fft_copy, adc_readings, NUMBER_OF_STORED_READINGS);
+        memcpy(adc_fft_copy, adc_readings, NMAX);
 
-        rdft(n, 1, adc_fft_copy, ip, w);
+        rdft(NMAX, 1, adc_fft_copy, ip, w);
 
-        for(int i; i < NUMBER_OF_STORED_READINGS; i++){
+        for(int i; i < NMAX; i++){
             warpPrint("%f\n", adc_fft_copy[i]);
         }
-
-        for(int i; i < 10000; i++){
-            ;
-        }
-        
 
     }
 

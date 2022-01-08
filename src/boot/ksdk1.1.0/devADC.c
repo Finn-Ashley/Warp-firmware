@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdbool.h>
+// #include <stdbool.h>
 #include <stdint.h>
 /*
  *	config.h needs to come first
@@ -28,7 +28,7 @@ double* heap_adc_readings;
 double* adc_readings_ptr;
 */
 
-double adc_readings[NUMBER_OF_STORED_READINGS];
+double adc_readings[NMAX + 1];
 
 void ADCinit(void)
 {
@@ -109,9 +109,9 @@ int32_t read_from_adc(void){
 
 void ADC_burn_in(void){
 
-    for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
+    for(int i = 0; i < NMAX; i++){
         // wait for and fetch conversion
-        adc_readings[i] = (double)read_from_adc();
+        adc_readings[i] = read_from_adc();
     }
 }
 
@@ -126,10 +126,10 @@ void update_adc_data(void){
     warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n", new_adc_read);
 
     // shift data in array left by one to free up most recent datapoint
-    for(int i = 0; NUMBER_OF_STORED_READINGS - 2; i++){
+    for(int i = 0; NMAX - 2; i++){
         adc_readings[i] = adc_readings[i+1];
     }
 
     // add in new datapoint
-    adc_readings[NUMBER_OF_STORED_READINGS - 1] = (double)new_adc_read;
+    adc_readings[NMAX - 1] = (double)read_from_adc();
 }
