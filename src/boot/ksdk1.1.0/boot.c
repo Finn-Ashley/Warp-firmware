@@ -40,7 +40,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <math.h>
+//#include <math.h>
+#include <complex.h>
 //#include <avr/pgmspace.h>
 
 /*
@@ -64,7 +65,7 @@
 #include "gpio_pins.h"
 #include "SEGGER_RTT.h"
 
-#include "fft4g.h"
+#include "fft.h"
 
 
 #ifndef NMAX
@@ -407,24 +408,17 @@ main(void)
 
 	devSSD1331init();
 
-	double adc_fft_copy[NMAX + 1];
-    int ip[NMAXSQRT + 2];
-    double w[NMAX * 5 / 4];
-
-	// n = NUMBER_OF_STORED_READINGS;
-    ip[0] = 0;
+	double complex fft_output[NUMBER_OF_STORED_READINGS];
 
     ADCinit();
 
     while(true){
 		update_adc_data();
 
-        memcpy(adc_fft_copy, adc_readings, NMAX);
+		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
 
-        rdft(NMAX, 1, adc_fft_copy, ip, w);
-
-        for(int i; i < NMAX; i++){
-            warpPrint("%f\n", adc_fft_copy[i]);
+        for(int i; i < NUMBER_OF_STORED_READINGS; i++){
+            warpPrint("%f + i%f\n", creal(fft_output[i]), cimag(fft_output[i]));
         }
 
     }

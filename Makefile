@@ -21,7 +21,7 @@ warp:
 	cp src/boot/ksdk1.1.0/devSSD1331.*				build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/devINA219.*				build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/devADC.*					build/ksdk1.1/work/demos/Warp/src/
-	cp src/boot/ksdk1.1.0/fft4g.*						build/ksdk1.1/work/demos/Warp/src/
+	cp src/boot/ksdk1.1.0/fft.*						build/ksdk1.1/work/demos/Warp/src/
 
 	cd build/ksdk1.1/work/lib/ksdk_platform_lib/armgcc/KL03Z4 && ./clean.sh; ./build_release.sh
 	cd build/ksdk1.1/work/demos/Warp/armgcc/Warp && ./clean.sh; ./build_release.sh
