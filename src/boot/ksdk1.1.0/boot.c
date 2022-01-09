@@ -409,17 +409,24 @@ main(void)
 	devSSD1331init();
 
 	double complex fft_output[NUMBER_OF_STORED_READINGS];
+	double frequency_powers[NUMBER_OF_STORED_READINGS];
 
     ADCinit();
 
     while(true){
 		update_adc_data();
 
+		warpPrint("Performing FFT...\n");
 		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
+		warpPrint("FFT done:\n");
 
-        for(int i; i < NUMBER_OF_STORED_READINGS; i++){
-            warpPrint("%f + i%f\n", creal(fft_output[i]), cimag(fft_output[i]));
+        for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
+			frequency_powers[i] = (creal(fft_output[i])*creal(fft_output[i]) + cimag(fft_output[i])*cimag(fft_output[i]));
+			warpPrint("component %d: %d\n", i,(int)frequency_powers[i]);
+            // warpPrint("%f + i%f\n", creal(fft_output[i]), cimag(fft_output[i]));
         }
+
+		draw_frequency_chart(frequency_powers);
 
     }
 

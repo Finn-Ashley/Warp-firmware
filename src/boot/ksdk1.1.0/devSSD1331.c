@@ -13,6 +13,7 @@
 #include "gpio_pins.h"
 #include "warp.h"
 #include "devSSD1331.h"
+#include "devADC.h"
 
 volatile uint8_t	inBuffer[1];
 volatile uint8_t	payloadBytes[1];
@@ -207,15 +208,15 @@ void draw_frequency_bar(int start, int end, int height, int colour){
 
 void draw_frequency_chart(double *bar_heights){
 
-	int number_of_bins = sizeof(&bar_heights)/sizeof(bar_heights[0]);
-	int bin_width = floor(0x5F / number_of_bins);
+	// int number_of_bins = sizeof(&bar_heights)/sizeof(bar_heights[0]);
+	int bin_width = floor(0x5F / NUMBER_OF_STORED_READINGS);
 
 	int max = 0;
-	int location;
-	for (int c = 0; c < number_of_bins; c++){
+	// int location;
+	for (int c = 0; c < NUMBER_OF_STORED_READINGS; c++){
         if (bar_heights[c] > max){
         	max = bar_heights[c];
-        	location = c;
+        	// location = c;
 		}
     }
 
@@ -226,7 +227,7 @@ void draw_frequency_chart(double *bar_heights){
 	writeCommand(0x5F);
 	writeCommand(0x3F);
 
-	for(int i = 0; i < number_of_bins; i++){
+	for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
 		int normalised_height = (bar_heights[i]/max)*(0x3F);
 		int start = i * bin_width;
 		int end = start + bin_width;
