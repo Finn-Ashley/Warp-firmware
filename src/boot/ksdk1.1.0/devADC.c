@@ -17,24 +17,18 @@
 #include "fsl_debug_console.h"
 #include "fsl_adc16_driver.h"
 
-// volatile double adc_readings[NUMBER_OF_STORED_READINGS];
-
 const uint32_t instance = 0U;
 const uint32_t chnGroup = 0U;
 const uint8_t chn = 8U;
 
-/*
-double* heap_adc_readings;
-double* adc_readings_ptr;
-*/
-
+int adc_readings[NUMBER_OF_STORED_READINGS];
 
 void ADCinit(void)
 {
 
     #if FSL_FEATURE_ADC16_HAS_CALIBRATION
         adc16_calibration_param_t MyAdcCalibraitionParam;
-    #endif // FSL_FEATURE_ADC16_HAS_CALIBRATION //
+    #endif
 
     adc16_user_config_t MyAdcUserConfig;
     adc16_chn_config_t MyChnConfig;
@@ -45,7 +39,7 @@ void ADCinit(void)
         // Auto calibraion. //
         ADC16_DRV_GetAutoCalibrationParam(instance, &MyAdcCalibraitionParam);
         ADC16_DRV_SetCalibrationParam(instance, &MyAdcCalibraitionParam);
-    #endif // FSL_FEATURE_ADC16_HAS_CALIBRATION //
+    #endif
 
     // Initialize the ADC converter. //
     ADC16_DRV_StructInitUserConfigDefault(&MyAdcUserConfig);
@@ -59,6 +53,7 @@ void ADCinit(void)
     MyChnConfig.chnMux = kAdcChnMuxOfA;
     ADC16_DRV_ConfigConvChn(instance, chnGroup, &MyChnConfig);
 
+    warpPrint("\nADC test:\n");
     for (i = 0U; i < 4U; i++)
     {
         // Wait for the most recent conversion.//
@@ -71,15 +66,9 @@ void ADCinit(void)
         ADC16_DRV_ConvRAWData(MyAdcValue, false,
         kAdcResolutionBitOfSingleEndAs12) );
     }
-    //ADC_burn_in();
-    //for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
-    //    warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n", adc_readings[i]);
-    //}
 
-    // heap_adc_readings = OSA_MemAlloc(NUMBER_OF_STORED_READINGS * sizeof(double));
-    // warpPrint("Address: %p\n", (void*)heap_adc_readings);
     ADC_burn_in();
-    warpPrint("Populated...");
+    warpPrint("Populating intial ADC array...\n");
 
     /*
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
@@ -110,7 +99,7 @@ void ADC_burn_in(void){
 
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
         // wait for and fetch conversion
-        adc_readings[i] = (double)read_from_adc();
+        adc_readings[i] = (int)read_from_adc();
     }
 }
 
@@ -122,13 +111,16 @@ void update_adc_data(void){
     // into some array of fixed length, overwriting oldest data value if full
 
     int32_t new_adc_read = read_from_adc();
-    warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n", new_adc_read);
+    warpPrint("\nNew read: %ld\r\n", new_adc_read);
 
     // shift data in array left by one to free up most recent datapoint
-    for(int i = 0; NUMBER_OF_STORED_READINGS - 2; i++){
+    warpPrint("Shifting index: ");
+    for(int i = 0; i < NUMBER_OF_STORED_READINGS - 2; i++){
+        warpPrint("%d, ", i);
         adc_readings[i] = adc_readings[i+1];
     }
 
     // add in new datapoint
-    adc_readings[NUMBER_OF_STORED_READINGS - 1] = (double)new_adc_read;
+    adc_readings[NUMBER_OF_STORED_READINGS - 1] = (int)read_from_adc();
+    warpPrint("\nHave shifted readings.\n");
 }

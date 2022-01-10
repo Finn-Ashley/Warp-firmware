@@ -3,7 +3,9 @@
  */
 
 int	devSSD1331init(void);
-
+void draw_frequency_chart(double *bar_heights);
+void draw_frequency_bar(int start, int end, int height, int colour);
+void chart_init(void);
 typedef enum
 {
 	kSSD1331ColororderRGB		= 1,

@@ -1,76 +1,45 @@
-#include <stdlib.h>
-#include <stdint.h>
+/* Fast Fourier Transform
+ * Cooley-Tukey algorithm with 2-radix DFT
+ */
+
 #include <complex.h>
-#include <math.h>
 
-#include "fft.h"
-#define MAX 200
+#define PI 3.14159265358979323846
 
-#define M_PI 3.1415926535897932384
-// define SAMPLING_STEP 1
+/*
+void fft_slow(int* x, double complex* X, unsigned int N) {
+    unsigned int n, k;
 
-int log2(int N){
-  int k = N;
-  int i = 0;
-  while(k) {
-    k >>= 1;
-    i++;
-  }
-  return i - 1;
-}
-
-int check(int n)    //checking if the number of element is a power of 2
-{
-  return n > 0 && (n & (n - 1)) == 0;
-}
-
-int reverse(int N, int n)    //calculating revers number
-{
-  int j, p = 0;
-  for(j = 1; j <= log2(N); j++) {
-    if(n & (1 << (log2(N) - j)))
-      p |= 1 << (j - 1);
-  }
-  return p;
-}
-
-void ordina(double complex* f1, int N) //using the reverse order in the array
-{
-  double complex f2[MAX];
-  for(int i = 0; i < N; i++)
-    f2[i] = f1[reverse(N, i)];
-  for(int j = 0; j < N; j++)
-    f1[j] = f2[j];
-}
-
-void transform(double complex* f, int N){
-  ordina(f, N);    //first: reverse order
-  double complex *W;
-  W = (double complex *)malloc(N / 2 * sizeof(double complex));
-  W[1] = polar(1., -2. * M_PI / N);
-  W[0] = 1;
-  for(int i = 2; i < N / 2; i++)
-    W[i] = pow(W[1], i);
-  int n = 1;
-  int a = N / 2;
-  for(int j = 0; j < log2(N); j++) {
-    for(int i = 0; i < N; i++) {
-      if(!(i & n)) {
-        double complex temp = f[i];
-        double complex Temp = W[(i * a) % (n * a)] * f[i + n];
-        f[i] = temp + Temp;
-        f[i + n] = temp - Temp;
-      }
+    // Iterate through, allowing X_K = sum_N of the complex frequencies.
+    for (k = 0; k < N; k++) {
+        for (n = 0; n < N; n++) {
+            X[k] += x[n] * cexp(-2 * PI * I * n * k / N);
+        }
     }
-    n *= 2;
-    a = a / 2;
-  }
-  free(W);
+}
+*/
+
+void fft_radix2(int* x, double complex* X, unsigned int N, unsigned int s) {
+    unsigned int k;
+    double complex t;
+
+    // At the lowest level pass through (delta T=0 means no phase).
+    if (N == 1) {
+        X[0] = x[0];
+        return;
+    }
+
+    // Cooley-Tukey: recursively split in two, then combine beneath.
+    fft_radix2(x, X, N/2, 2*s);
+    fft_radix2(x+s, X + N/2, N/2, 2*s);
+
+    for (k = 0; k < N/2; k++) {
+        t = X[k];
+        X[k] = t + cexp(-2 * PI * I * k / N) * X[k + N/2];
+        X[k + N/2] = t - cexp(-2 * PI * I * k / N) * X[k + N/2];
+    }
 }
 
-void FFT(double complex* f, int N, double d){
-  transform(f, N);
-  for(int i = 0; i < N; i++){
-    f[i] *= d; //multiplying by step
-  }
+void fft(int* x, double complex* X, unsigned int N) {
+    fft_radix2(x, X, N, 1);
 }
