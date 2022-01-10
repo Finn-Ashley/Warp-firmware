@@ -53,6 +53,7 @@ void ADCinit(void)
     MyChnConfig.chnMux = kAdcChnMuxOfA;
     ADC16_DRV_ConfigConvChn(instance, chnGroup, &MyChnConfig);
 
+    warpPrint("\nADC test:\n");
     for (i = 0U; i < 4U; i++)
     {
         // Wait for the most recent conversion.//
@@ -67,7 +68,7 @@ void ADCinit(void)
     }
 
     ADC_burn_in();
-    warpPrint("Populated...");
+    warpPrint("Populating intial ADC array...\n");
 
     /*
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){

@@ -237,6 +237,8 @@ warpPrint(const char *fmt, ...)
 int
 main(void)
 {
+	warpPrint("\n\n ------- PROGRAM START ------- \n\n");
+
 	rtc_datetime_t				warpBootDate;
 
 	/*
@@ -342,7 +344,9 @@ main(void)
 	 *	so until we call it pins are in their default state.
 	 */
 	warpPrint("About to lowPowerPinStates()... ");
+	OSA_TimeDelay(1000);
 	lowPowerPinStates();
+	OSA_TimeDelay(1000);
 	warpPrint("done.\n");
 
 	/*

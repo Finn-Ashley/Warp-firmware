@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <math.h>
+#include <complex.h>
 
 /*
  *	config.h needs to come first
@@ -14,6 +15,8 @@
 #include "warp.h"
 #include "devSSD1331.h"
 #include "devADC.h"
+#include "fft.h"
+
 
 volatile uint8_t	inBuffer[1];
 volatile uint8_t	payloadBytes[1];
@@ -149,7 +152,7 @@ devSSD1331init(void)
 	/*
 	 *	Clear Screen
 	 */
-	warpPrint("CLEARING");
+	warpPrint("Clearing screen...\n");
 	writeCommand(kSSD1331CommandCLEAR);
 	writeCommand(0x00);
 	writeCommand(0x00);
@@ -162,7 +165,7 @@ devSSD1331init(void)
 	 *	Any post-initialization drawing commands go here.
 	 */
 	
-	warpPrint("Should be drawing....");
+	warpPrint("Drawing red background...\n");
 	// draw rectangle
 	writeCommand(kSSD1331CommandDRAWRECT);
 
@@ -184,6 +187,30 @@ devSSD1331init(void)
 
 	// draw_frequency_bar(0, 5, 60, 0xFF);
 
+	/*
+
+	double complex fft_output[NUMBER_OF_STORED_READINGS];
+	double frequency_powers[NUMBER_OF_STORED_READINGS];
+
+	chart_init();
+
+    while(true){
+		update_adc_data();
+
+		warpPrint("Performing FFT...\n");
+		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
+		warpPrint("FFT done:\n");
+
+        for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
+			frequency_powers[i] = (creal(fft_output[i])*creal(fft_output[i]) + cimag(fft_output[i])*cimag(fft_output[i]));
+			warpPrint("component %d: %d\n", i,(int)frequency_powers[i]);
+            // warpPrint("%f + i%f\n", creal(fft_output[i]), cimag(fft_output[i]));
+        }
+
+		draw_frequency_chart(frequency_powers);
+
+    }
+	*/
 
 	return 0;
 }
