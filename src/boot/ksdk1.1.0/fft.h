@@ -1,7 +1,10 @@
-int log2(int N);
-int check(int n);
-int reverse(int N, int n);
-void ordina(double complex* f1, int N);
-void transform(double complex* f, int N);
-void FFT(double complex* f, int N, double d);
-int run_transform(void);
+/* Fast Fourier Transform
+ * Cooley-Tukey algorithm with 2-radix DFT
+ */
+
+#include <stdint.h>
+#include <complex.h>
+
+//void fft_slow(int* x, double complex* X, uint16_t N);
+
+void fft(int* x, double complex* X, uint16_t N);
