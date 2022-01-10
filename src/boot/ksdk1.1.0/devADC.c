@@ -53,6 +53,7 @@ void ADCinit(void)
     MyChnConfig.chnMux = kAdcChnMuxOfA;
     ADC16_DRV_ConfigConvChn(instance, chnGroup, &MyChnConfig);
 
+    /*
     for (i = 0U; i < 4U; i++)
     {
         // Wait for the most recent conversion.//
@@ -65,6 +66,7 @@ void ADCinit(void)
         ADC16_DRV_ConvRAWData(MyAdcValue, false,
         kAdcResolutionBitOfSingleEndAs12) );
     }
+    */
 
     ADC_burn_in();
     warpPrint("Populated...");
@@ -109,8 +111,10 @@ void update_adc_data(void){
     // I want this to fetch the latest ADC value, convert it and then put it in 
     // into some array of fixed length, overwriting oldest data value if full
 
+    /*
     int32_t new_adc_read = read_from_adc();
     warpPrint("\nNew read: %ld\r\n", new_adc_read);
+    */
 
     // shift data in array left by one to free up most recent datapoint
     warpPrint("Shifting index: ");

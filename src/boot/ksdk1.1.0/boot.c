@@ -118,11 +118,6 @@
 	volatile WarpI2CDeviceState			deviceMMA8451QState;
 #endif
 
-#if (WARP_BUILD_ENABLE_DEVINA219)
-	#include "devINA219.h"
-	volatile WarpI2CDeviceState			deviceINA219State;
-#endif
-
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
 	#include "devLPS25H.h"
 	volatile WarpI2CDeviceState			deviceLPS25HState;
@@ -1627,12 +1622,6 @@ main(void)
 		initMMA8451Q(	0x1D	/* i2cAddress */,		kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
 	#endif
 
-	/*
-	 * Add in new sensor initialization
-	 */
-	#if (WARP_BUILD_ENABLE_DEVINA219)
-		initINA219(	0x40	/* i2cAddress */);
-	#endif
 
 
 	#if (WARP_BUILD_ENABLE_DEVLPS25H)
@@ -2130,32 +2119,6 @@ main(void)
 		{
 			
 			// Add a new case to the warp menu for interacting with the INA219
-			case 'y':
-			{
-				// send config value
-				warpPrint("\nPerforming sensor config, sending value %d ...\n", 0x0000|0x0000|0x0180|0x0018|0x07);
-				writeSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CONFIG_MSB, 0x0000|0x0000|0x0180|0x0018|0x07);
-
-				// send calibration value
-				warpPrint("\nPerforming sensor calibration, sending value %d ...\n", 0x2000);
-				writeSensorRegisterINA219(kWarpSensorOutputRegisterINA219_CALIB_MSB, 0x2000);
-
-				// print all registers to check we see the just send config and calib values
-				warpPrint("\nAll register output:\n");
-				printSensorDataINA219(false);
-
-				// take 1000 current measurements in .csv format
-				warpPrint("\nCalibrated. Starting current measurements:\n");
-				take1000CurrentMeasurements(false);
-				
-				// Uncomment to take 5 singular measurements for debugging purposes
-				// for (int i = 0; i < 5; i++){
-				//	warpPrint("\nReading %d: ", i);
-				//	printCurrentDataINA219(false);
-				//}
-
-				break;
-			}
 
 			/*
 			 *		Select sensor

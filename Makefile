@@ -43,7 +43,6 @@ warp:
 	cp src/boot/ksdk1.1.0/devAT45DB.*				build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/devICE40.*				build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/devSSD1331.*				build/ksdk1.1/work/demos/Warp/src/
-	cp src/boot/ksdk1.1.0/devINA219.*				build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/devADC.*					build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/fft.*						build/ksdk1.1/work/demos/Warp/src/
 
