@@ -39,7 +39,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
+//#include <stdarg.h>
 //#include <math.h>
 #include <complex.h>
 //#include <avr/pgmspace.h>
@@ -68,12 +68,6 @@
 #include "fft.h"
 
 
-#ifndef NMAX
-#define NMAX 16
-#define NMAXSQRT 4
-#endif
-
-
 #if (WARP_BUILD_ENABLE_DEVSSD1331)
 	#include "devSSD1331.h"
 	volatile WarpSPIDeviceState			deviceSSD1331State;
@@ -81,15 +75,8 @@
 
 #if (WARP_BUILD_ENABLE_DEVADC)
 	#include "devADC.h"
-	#include "fft4g.h"
 #endif
 
-#if (WARP_BUILD_ENABLE_DEVINA219)
-	#include "devINA219.h"
-	volatile WarpI2CDeviceState			deviceINA219State;
-#endif
-
-volatile i2c_master_state_t				i2cMasterState;
 volatile spi_master_state_t				spiMasterState;
 volatile spi_master_user_config_t			spiUserConfig;
 
@@ -132,40 +119,6 @@ warpEnableSPIpins(void)
 	spiUserConfig.bitsPerSec	= gWarpSpiBaudRateKbps * 1000;
 	SPI_DRV_MasterInit(0 /* SPI master instance */, (spi_master_state_t *)&spiMasterState);
 	SPI_DRV_MasterConfigureBus(0 /* SPI master instance */, (spi_master_user_config_t *)&spiUserConfig, &calculatedBaudRate);
-}
-
-void
-warpEnableI2Cpins(void)
-{
-	CLOCK_SYS_EnableI2cClock(0);
-
-	/*
-	 *	Setup:
-	 *
-	 *		PTB3/kWarpPinI2C0_SCL_UART_TX	-->	(ALT2 == I2C)
-	 *		PTB4/kWarpPinI2C0_SDA_UART_RX	-->	(ALT2 == I2C)
-	 */
-	PORT_HAL_SetMuxMode(PORTB_BASE, 3, kPortMuxAlt2);
-	PORT_HAL_SetMuxMode(PORTB_BASE, 4, kPortMuxAlt2);
-
-	I2C_DRV_MasterInit(0 /* I2C instance */, (i2c_master_state_t *)&i2cMasterState);
-}
-
-void
-warpDisableI2Cpins(void)
-{
-	I2C_DRV_MasterDeinit(0 /* I2C instance */);
-
-	/*
-	 *	Setup:
-	 *
-	 *		PTB3/kWarpPinI2C0_SCL_UART_TX	-->	disabled
-	 *		PTB4/kWarpPinI2C0_SDA_UART_RX	-->	disabled
-	 */
-	PORT_HAL_SetMuxMode(PORTB_BASE, 3, kPortPinDisabled);
-	PORT_HAL_SetMuxMode(PORTB_BASE, 4, kPortPinDisabled);
-
-	CLOCK_SYS_DisableI2cClock(0);
 }
 
 void
@@ -393,25 +346,23 @@ main(void)
 	warpPrint("done.\n");
 
 	/*
-	 * Add in new sensor initialization
-	 */
-	#if (WARP_BUILD_ENABLE_DEVINA219)
-		initINA219(	0x40	/* i2cAddress */);
-	#endif
-
-	/*
 	 *	At this point, we consider the system "booted" and, e.g., warpPrint()s
 	 *	will also be sent to the BLE if that is compiled in.
 	 */
 	gWarpBooted = true;
 	warpPrint("Boot done.\n");
 
-	devSSD1331init();
+	
 
 	double complex fft_output[NUMBER_OF_STORED_READINGS];
 	double frequency_powers[NUMBER_OF_STORED_READINGS];
 
+	warpPrint("size of int = %d", sizeof(int));
+
     ADCinit();
+	
+	devSSD1331init();
+	chart_init();
 
     while(true){
 		update_adc_data();
