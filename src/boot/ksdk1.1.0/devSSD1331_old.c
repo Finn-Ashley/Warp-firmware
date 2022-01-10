@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include <math.h>
 
 /*
  *	config.h needs to come first
@@ -25,7 +24,7 @@ enum
 {
 	kSSD1331PinMOSI		= GPIO_MAKE_PIN(HW_GPIOA, 8),
 	kSSD1331PinSCK		= GPIO_MAKE_PIN(HW_GPIOA, 9),
-	kSSD1331PinCSn		= GPIO_MAKE_PIN(HW_GPIOB, 11),
+	kSSD1331PinCSn		= GPIO_MAKE_PIN(HW_GPIOB, 13),
 	kSSD1331PinDC		= GPIO_MAKE_PIN(HW_GPIOA, 12),
 	kSSD1331PinRST		= GPIO_MAKE_PIN(HW_GPIOB, 0),
 };
@@ -85,7 +84,7 @@ devSSD1331init(void)
 	 *
 	 *	Reconfigure to use as GPIO.
 	 */
-	PORT_HAL_SetMuxMode(PORTB_BASE, 11u, kPortMuxAsGpio);
+	PORT_HAL_SetMuxMode(PORTB_BASE, 13u, kPortMuxAsGpio);
 	PORT_HAL_SetMuxMode(PORTA_BASE, 12u, kPortMuxAsGpio);
 	PORT_HAL_SetMuxMode(PORTB_BASE, 0u, kPortMuxAsGpio);
 
@@ -161,75 +160,31 @@ devSSD1331init(void)
 	/*
 	 *	Any post-initialization drawing commands go here.
 	 */
-	
-	warpPrint("Should be drawing....");
-	// draw rectangle
-	writeCommand(kSSD1331CommandDRAWRECT);
+	//...
 
-	// set start and end row and column
-	writeCommand(0x00);
-	writeCommand(0x00);
-	writeCommand(0x5F); // col max
-	writeCommand(0x3F); // row max
+	// draw a big rectangle!
+	writeCommand(kSSD1331CommandDRAWRECT);
+	
+	// start column and row
+	writeCommand(0x01);
+	writeCommand(0x01);
+
+	// end column and row
+	writeCommand(0x0F);
+	writeCommand(0x0F);
 
 	// set outline colour
+	writeCommand(0x1E);
 	writeCommand(0x00);
-	writeCommand(0xFF);
 	writeCommand(0x00);
 
 	// set fill colour
+	writeCommand(0x1E);
 	writeCommand(0x00);
-	writeCommand(0xFF);
 	writeCommand(0x00);
+
 
 
 
 	return 0;
 }
-
-void draw_frequency_bar(int start, int end, int height, int colour){
-	// set start and end row and column
-	writeCommand(start); // start col
-	writeCommand(0x00); // start row
-	writeCommand(end); // end col
-	writeCommand(height); // end row
-
-	// set outline colour
-	writeCommand(0x00);
-	writeCommand(colour);
-	writeCommand(0x00);
-
-	// set fill colour
-	writeCommand(0x00);
-	writeCommand(colour);
-	writeCommand(0x00);
-}
-
-void draw_frequency_chart(double *bar_heights){
-
-	int number_of_bins = sizeof(&bar_heights)/sizeof(bar_heights[0]);
-	int bin_width = floor(0x5F / number_of_bins);
-
-	int max = 0;
-	int location;
-	for (int c = 0; c < number_of_bins; c++){
-        if (bar_heights[c] > max){
-        	max = bar_heights[c];
-        	location = c;
-		}
-    }
-
-	// clear screen before redrawing
-	writeCommand(kSSD1331CommandCLEAR);
-	writeCommand(0x00);
-	writeCommand(0x00);
-	writeCommand(0x5F);
-	writeCommand(0x3F);
-
-	for(int i = 0; i < number_of_bins; i++){
-		int normalised_height = (bar_heights[i]/max)*(0x3F);
-		int start = i * bin_width;
-		int end = start + bin_width;
-		draw_frequency_bar(start, end, normalised_height, rand() % 256);
-	}
- }
