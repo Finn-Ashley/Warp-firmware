@@ -17,6 +17,8 @@
 #include "fsl_debug_console.h"
 #include "fsl_adc16_driver.h"
 
+#include "/home/students/fwa20/Warp-firmware/tools/sdk/ksdk1.1.0/platform/CMSIS/Include/device/MKL03Z4/MKL03Z4_features.h"
+
 const uint32_t instance = 0U;
 const uint32_t chnGroup = 0U;
 const uint8_t chn = 8U;
@@ -32,8 +34,6 @@ void ADCinit(void)
 
     adc16_user_config_t MyAdcUserConfig;
     adc16_chn_config_t MyChnConfig;
-    uint16_t MyAdcValue;
-    uint32_t i;
 
     #if FSL_FEATURE_ADC16_HAS_CALIBRATION
         // Auto calibraion. //
@@ -53,29 +53,8 @@ void ADCinit(void)
     MyChnConfig.chnMux = kAdcChnMuxOfA;
     ADC16_DRV_ConfigConvChn(instance, chnGroup, &MyChnConfig);
 
-    warpPrint("\nADC test:\n");
-    for (i = 0U; i < 4U; i++)
-    {
-        // Wait for the most recent conversion.//
-        ADC16_DRV_WaitConvDone(instance, chnGroup);
-
-        // Fetch the conversion value and format it. //
-        MyAdcValue = ADC16_DRV_GetConvValueRAW(instance, chnGroup);
-        warpPrint("ADC16_DRV_GetConvValueRAW: 0x%X\t", MyAdcValue);
-        warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n",
-        ADC16_DRV_ConvRAWData(MyAdcValue, false,
-        kAdcResolutionBitOfSingleEndAs12) );
-    }
 
     ADC_burn_in();
-    warpPrint("Populating intial ADC array...\n");
-
-    /*
-    for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
-        warpPrint("%f", adc_readings[i]);
-    }
-    */
-
 }
 
 /*
@@ -110,17 +89,11 @@ void update_adc_data(void){
     // I want this to fetch the latest ADC value, convert it and then put it in 
     // into some array of fixed length, overwriting oldest data value if full
 
-    int32_t new_adc_read = read_from_adc();
-    warpPrint("\nNew read: %ld\r\n", new_adc_read);
-
     // shift data in array left by one to free up most recent datapoint
-    warpPrint("Shifting index: ");
     for(int i = 0; i < NUMBER_OF_STORED_READINGS - 2; i++){
-        warpPrint("%d, ", i);
         adc_readings[i] = adc_readings[i+1];
     }
 
     // add in new datapoint
     adc_readings[NUMBER_OF_STORED_READINGS - 1] = (int)read_from_adc();
-    warpPrint("\nHave shifted readings.\n");
 }

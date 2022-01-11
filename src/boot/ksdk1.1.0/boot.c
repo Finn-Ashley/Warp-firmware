@@ -39,10 +39,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <stdarg.h>
-//#include <math.h>
+#include <stdarg.h>
 #include <complex.h>
-//#include <avr/pgmspace.h>
 
 /*
  *	config.h needs to come first
@@ -66,27 +64,25 @@
 #include "SEGGER_RTT.h"
 
 #include "fft.h"
+#include "devSSD1331.h"
+#include "devADC.h"
 
-
-#if (WARP_BUILD_ENABLE_DEVSSD1331)
-	#include "devSSD1331.h"
-	volatile WarpSPIDeviceState			deviceSSD1331State;
-#endif
-
-#if (WARP_BUILD_ENABLE_DEVADC)
-	#include "devADC.h"
-#endif
+volatile WarpSPIDeviceState			deviceSSD1331State;
 
 volatile spi_master_state_t				spiMasterState;
 volatile spi_master_user_config_t			spiUserConfig;
 
 volatile bool						gWarpBooted				= false;
-volatile uint32_t					gWarpSpiBaudRateKbps			= kWarpDefaultSpiBaudRateKbps;
-char							gWarpPrintBuffer[kWarpDefaultPrintBufferSizeBytes];
+
 
 /*
  *	Since only one SPI transaction is ongoing at a time in our implementation
  */
+uint8_t							gWarpSpiCommonSourceBuffer[kWarpMemoryCommonSpiBufferBytes];
+uint8_t							gWarpSpiCommonSinkBuffer[kWarpMemoryCommonSpiBufferBytes];
+volatile uint32_t					gWarpSpiTimeoutMicroseconds		= kWarpDefaultSpiTimeoutMicroseconds;
+volatile uint32_t					gWarpSpiBaudRateKbps			= kWarpDefaultSpiBaudRateKbps;
+// char							gWarpPrintBuffer[kWarpDefaultPrintBufferSizeBytes];
 
 static void						lowPowerPinStates(void);
 
@@ -197,48 +193,9 @@ lowPowerPinStates(void)
 		PORT_HAL_SetMuxMode(PORTB_BASE, 13, kPortPinDisabled);
 	}
 
-void
-warpPrint(const char *fmt, ...)
-{
-	int	fmtlen;
-	va_list	arg;
-
-	/*
-	 *	We use an ifdef rather than a C if to allow us to compile-out
-	 *	all references to SEGGER_RTT_*printf if we don't want them.
-	 *
-	 *	NOTE: SEGGER_RTT_vprintf takes a va_list* rather than a va_list
-	 *	like usual vprintf. We modify the SEGGER_RTT_vprintf so that it
-	 *	also takes our print buffer which we will eventually send over
-	 *	BLE. Using SEGGER_RTT_vprintf() versus the libc vsnprintf saves
-	 *	2kB flash and removes the use of malloc so we can keep heap
-	 *	allocation to zero.
-	 */
-	#if (WARP_BUILD_ENABLE_SEGGER_RTT_PRINTF)
-		/*
-		 *	We can't use SEGGER_RTT_vprintf to format into a buffer
-		 *	since SEGGER_RTT_vprintf formats directly into the special
-		 *	RTT memory region to be picked up by the RTT / SWD mechanism...
-		 */
-		va_start(arg, fmt);
-		fmtlen = SEGGER_RTT_vprintf(0, fmt, &arg, gWarpPrintBuffer, kWarpDefaultPrintBufferSizeBytes);
-		va_end(arg);
-
-		if (fmtlen < 0)
-		{
-			SEGGER_RTT_WriteString(0, gWarpEfmt);
-			return;
-		}
-	#endif
-
-	return;
-}
-
 int
 main(void)
 {
-	warpPrint("\n\n ------- PROGRAM START ------- \n\n");
-
 	rtc_datetime_t				warpBootDate;
 
 	/*
@@ -313,6 +270,12 @@ main(void)
 	warpBootDate.second	= 0U;
 	RTC_DRV_SetDatetime(0, &warpBootDate);
 
+	POWER_SYS_Init(	&powerConfigs,
+		sizeof(powerConfigs)/sizeof(power_manager_user_config_t *),
+		NULL,
+		0
+	);
+
 	/*
 	 *	Switch CPU to Very Low Power Run (VLPR) mode
 	 */
@@ -326,9 +289,7 @@ main(void)
 	 *
 	 *	See also Section 30.3.3 GPIO Initialization of KSDK13APIRM.pdf
 	 */
-	warpPrint("About to GPIO_DRV_Init()... ");
 	GPIO_DRV_Init(inputPins  /* input pins */, outputPins  /* output pins */);
-	warpPrint("done.\n");
 
 	/*
 	 *	Make sure the SWD pins, PTA0/1/2 SWD pins in their ALT3 state (i.e., as SWD).
@@ -343,42 +304,28 @@ main(void)
 	 *	Note that it is lowPowerPinStates() that sets the pin mux mode,
 	 *	so until we call it pins are in their default state.
 	 */
-	warpPrint("About to lowPowerPinStates()... ");
-	OSA_TimeDelay(1000);
 	lowPowerPinStates();
-	OSA_TimeDelay(1000);
-	warpPrint("done.\n");
 
 	/*
 	 *	At this point, we consider the system "booted" and, e.g., warpPrint()s
 	 *	will also be sent to the BLE if that is compiled in.
 	 */
 	gWarpBooted = true;
-	warpPrint("Boot done.\n");
 
-	
-
-	double complex fft_output[NUMBER_OF_STORED_READINGS];
-	double frequency_powers[NUMBER_OF_STORED_READINGS];
-
-	warpPrint("size of int = %d", sizeof(int));
+	float complex fft_output[NUMBER_OF_STORED_READINGS];
+	float frequency_powers[NUMBER_OF_FREQS];
 
     ADCinit();
-	
 	devSSD1331init();
-	chart_init();
 
-    while(true){
-		update_adc_data();
+    while(1){
 
-		warpPrint("Performing FFT...\n");
+		ADC_burn_in();
 		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
-		warpPrint("FFT done:\n");
 
-        for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
+		// first two components often noisy and dominating
+        for(int i = 2; i < NUMBER_OF_FREQS; i++){
 			frequency_powers[i] = (creal(fft_output[i])*creal(fft_output[i]) + cimag(fft_output[i])*cimag(fft_output[i]));
-			warpPrint("component %d: %d\n", i,(int)frequency_powers[i]);
-            // warpPrint("%f + i%f\n", creal(fft_output[i]), cimag(fft_output[i]));
         }
 
 		draw_frequency_chart(frequency_powers);

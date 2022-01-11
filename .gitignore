@@ -3,6 +3,5 @@ build/ksdk1.1/work
 setup.conf
 tools/scripts/warp.jlink.commands
 tools/scripts/glaux.jlink.commands
-
-changes.diff
-change2.dif
+settings.json
+vscode/

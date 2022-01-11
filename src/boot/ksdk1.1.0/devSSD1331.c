@@ -21,6 +21,7 @@
 volatile uint8_t	inBuffer[1];
 volatile uint8_t	payloadBytes[1];
 int bin_width;
+int max;
 
 /*
  *	Override Warp firmware's use of these pins and define new aliases.
@@ -66,8 +67,6 @@ writeCommand(uint8_t commandByte)
 
 	return status;
 }
-
-
 
 int
 devSSD1331init(void)
@@ -152,7 +151,6 @@ devSSD1331init(void)
 	/*
 	 *	Clear Screen
 	 */
-	warpPrint("Clearing screen...\n");
 	writeCommand(kSSD1331CommandCLEAR);
 	writeCommand(0x00);
 	writeCommand(0x00);
@@ -160,12 +158,13 @@ devSSD1331init(void)
 	writeCommand(0x3F);
 
 
-
 	/*
 	 *	Any post-initialization drawing commands go here.
 	 */
-	
-	warpPrint("Drawing red background...\n");
+	bin_width = 0x5F / (NUMBER_OF_FREQS - 2);
+	max = 0;
+
+	#if DRAW_RECT
 	// draw rectangle
 	writeCommand(kSSD1331CommandDRAWRECT);
 
@@ -184,55 +183,21 @@ devSSD1331init(void)
 	writeCommand(0xFF);
 	writeCommand(0x00);
 	writeCommand(0x00);
-
-	// draw_frequency_bar(0, 5, 60, 0xFF);
-
-	/*
-
-	double complex fft_output[NUMBER_OF_STORED_READINGS];
-	double frequency_powers[NUMBER_OF_STORED_READINGS];
-
-	chart_init();
-
-    while(true){
-		update_adc_data();
-
-		warpPrint("Performing FFT...\n");
-		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
-		warpPrint("FFT done:\n");
-
-        for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
-			frequency_powers[i] = (creal(fft_output[i])*creal(fft_output[i]) + cimag(fft_output[i])*cimag(fft_output[i]));
-			warpPrint("component %d: %d\n", i,(int)frequency_powers[i]);
-            // warpPrint("%f + i%f\n", creal(fft_output[i]), cimag(fft_output[i]));
-        }
-
-		draw_frequency_chart(frequency_powers);
-
-    }
-	*/
+	#endif
 
 	return 0;
-}
-
-void chart_init(void){
-	bin_width = 0x5F / NUMBER_OF_STORED_READINGS;
-	warpPrint("\nBin widths calculated.\n");
 }
 
 void draw_frequency_bar(int start, int end, int height, int colour){
 	// set start and end row and column
 
-
 	writeCommand(kSSD1331CommandDRAWRECT);
-	warpPrint("Sending coords...");
 	writeCommand(start); // start col
 	writeCommand(0x00); // start row
 	writeCommand(end); // end col
 	writeCommand(height); // end row
 
 	// set outline colour
-	warpPrint("Sending outline command...");
 	writeCommand(0x00);
 	writeCommand(colour);
 	writeCommand(0x00);
@@ -243,51 +208,33 @@ void draw_frequency_bar(int start, int end, int height, int colour){
 	writeCommand(0x00);
 }
 
-void draw_frequency_chart(double *bar_heights){
+void draw_frequency_chart(float *bar_heights){
 
 	int normalised_height, start, end;
+	float height;
 	
-	int max = 0;
-	for (int c = 0; c < NUMBER_OF_STORED_READINGS; c++){
-        if (bar_heights[c] > max){
-        	max = bar_heights[c];
+	for (int c = 2; c < NUMBER_OF_FREQS; c++){
+		height = bar_heights[c];
+        if (height > max){
+        	max = height;
 		}
     }
 
-	warpPrint("Max bar height found.\n");
-
-	/*
 	// clear screen before redrawing
-	warpPrint("Clearing..\n");
-	warpEnableSPIpins();
 	writeCommand(kSSD1331CommandCLEAR);
-	
 	writeCommand(0x00);
 	writeCommand(0x00);
-	warpPrint("Start coords sent.\n");
 	writeCommand(0x5F);
 	writeCommand(0x3F);
-	warpPrint("End coords sent.\n");
-	warpPrint("Screen cleared.\n");
-	*/
 
-	
+	// draw chart
+	for(int i = 2; i < NUMBER_OF_FREQS; i++){
 
+		normalised_height = (bar_heights[i]/max)*(0x3F);
 
-	warpPrint("Drawing chart:\n");
-	for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
-
-		// height
-		normalised_height = (bar_heights[i]/max)*(0x3F) + 1;
-		warpPrint("\nBin %d: height = %d, ", i, normalised_height);
-
-		start = i * bin_width;
-		warpPrint("start = %d, ", start);
-
+		start = (i - 2) * bin_width;
 		end = start + bin_width;
-		warpPrint("end = %d\n", end);
 
-		warpPrint("Drawing bar...\n");
-		draw_frequency_bar(start, end, 0x3A, 0xFF);
+		draw_frequency_bar(start, end, normalised_height, 0xFF);
 	}
  }
