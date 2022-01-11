@@ -161,7 +161,7 @@ devSSD1331init(void)
 	/*
 	 *	Any post-initialization drawing commands go here.
 	 */
-	bin_width = 0x5F / (NUMBER_OF_FREQS - 2);
+	bin_width = 0x5F / (NUMBER_OF_FREQS - IGNORED_FREQS);
 	max = 0;
 
 	#if DRAW_RECT
@@ -198,14 +198,60 @@ void draw_frequency_bar(int start, int end, int height, int colour){
 	writeCommand(height); // end row
 
 	// set outline colour
-	writeCommand(0x00);
-	writeCommand(colour);
-	writeCommand(0x00);
+	writeCommand(0xFF);
+	writeCommand(0xFF);
+	writeCommand(0xFF);
 
-	// set fill colour
-	writeCommand(0x00);
-	writeCommand(colour);
-	writeCommand(0x00);
+	// set fill colour - could pass in a struct containing all values, but
+	// would be memory intensive for all bars and close to stack limit.
+	// Sacrifice MCU cycles instead.
+	switch(colour){
+
+		// red
+		case 1:
+			writeCommand(0xFF);
+			writeCommand(0x00);
+			writeCommand(0x00);
+			break;
+
+		// green
+		case 2:
+			writeCommand(0x00);
+			writeCommand(0xFF);
+			writeCommand(0x00);
+			break;
+
+		// blue
+		case 3:
+			writeCommand(0x00);
+			writeCommand(0x00);
+			writeCommand(0xFF);
+			break;
+
+		// purple
+		case 4:
+			writeCommand(0xA0);
+			writeCommand(0x20);
+			writeCommand(0xF0);
+			break;
+
+		// yellow
+		case 5:
+			writeCommand(0xFF);
+			writeCommand(0xFF);
+			writeCommand(0x00);
+			break;
+
+		// yellow
+		case 6:
+			writeCommand(0xFF);
+			writeCommand(0xA5);
+			writeCommand(0x00);
+			break;
+	}
+	
+
+	
 }
 
 void draw_frequency_chart(float *bar_heights){
@@ -213,7 +259,7 @@ void draw_frequency_chart(float *bar_heights){
 	int normalised_height, start, end;
 	float height;
 	
-	for (int c = 2; c < NUMBER_OF_FREQS; c++){
+	for (int c = IGNORED_FREQS; c < NUMBER_OF_FREQS; c++){
 		height = bar_heights[c];
         if (height > max){
         	max = height;
@@ -228,13 +274,13 @@ void draw_frequency_chart(float *bar_heights){
 	writeCommand(0x3F);
 
 	// draw chart
-	for(int i = 2; i < NUMBER_OF_FREQS; i++){
+	for(int i = IGNORED_FREQS; i < NUMBER_OF_FREQS; i++){
 
 		normalised_height = (bar_heights[i]/max)*(0x3F);
 
-		start = (i - 2) * bin_width;
+		start = (i - IGNORED_FREQS) * bin_width;
 		end = start + bin_width;
 
-		draw_frequency_bar(start, end, normalised_height, 0xFF);
+		draw_frequency_bar(start, end, normalised_height, i - 1);
 	}
  }

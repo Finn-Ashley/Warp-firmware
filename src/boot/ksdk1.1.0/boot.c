@@ -324,7 +324,7 @@ main(void)
 		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
 
 		// first two components often noisy and dominating
-        for(int i = 2; i < NUMBER_OF_FREQS; i++){
+        for(int i = IGNORED_FREQS; i < NUMBER_OF_FREQS; i++){
 			frequency_powers[i] = (creal(fft_output[i])*creal(fft_output[i]) + cimag(fft_output[i])*cimag(fft_output[i]));
         }
 
