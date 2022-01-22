@@ -16,8 +16,9 @@
 #include "fsl_os_abstraction.h"
 #include "fsl_debug_console.h"
 #include "fsl_adc16_driver.h"
+#include "fsl_adc16_hal.h"
 
-#include "/home/students/fwa20/Warp-firmware/tools/sdk/ksdk1.1.0/platform/CMSIS/Include/device/MKL03Z4/MKL03Z4_features.h"
+//#include "/home/students/fwa20/Warp-firmware/tools/sdk/ksdk1.1.0/platform/CMSIS/Include/device/MKL03Z4/MKL03Z4_features.h"
 
 const uint32_t instance = 0U;
 const uint32_t chnGroup = 0U;
@@ -79,6 +80,8 @@ void ADC_burn_in(void){
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
         // wait for and fetch conversion
         adc_readings[i] = (int)read_from_adc();
+
+        // OSA_TimeDelay(SAMPLING_PERIOD);
     }
 }
 

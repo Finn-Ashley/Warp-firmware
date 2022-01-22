@@ -1,5 +1,7 @@
 #include "fsl_spi_master_driver.h"
 
+#define DEBUG 0
+
 #define	min(x,y)	((x) < (y) ? (x) : (y))
 #define	max(x,y)	((x) > (y) ? (x) : (y))
 #define	USED(x)		(void)(x)
@@ -108,4 +110,7 @@ typedef struct
 WarpStatus	warpSetLowPowerMode(WarpPowerMode powerMode, uint32_t sleepSeconds);
 void		warpEnableSPIpins(void);
 void		warpDeasserAllSPIchipSelects(void);
+
+#if DEBUG
 void		warpPrint(const char *fmt, ...);
+#endif

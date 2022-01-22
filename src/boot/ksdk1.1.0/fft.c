@@ -3,6 +3,9 @@
  */
 
 #include <complex.h>
+#include <stdint.h>
+
+#include "devADC.h"
 
 #define PI 3.14159265358979323846
 
@@ -29,4 +32,11 @@ void fft_radix2(int* x, float complex* X, unsigned int N, unsigned int s) {
 
 void fft(int* x, float complex* X, unsigned int N) {
     fft_radix2(x, X, N, 1);
+}
+
+void process_powers(float complex *fft_output, float *frequency_powers){
+    for(uint8_t i = 0; i < NUMBER_OF_FREQS - IGNORED_FREQS; i++){
+			
+		frequency_powers[i] = (creal(fft_output[i + SHUNT])*creal(fft_output[i + SHUNT]) + cimag(fft_output[i + SHUNT])*cimag(fft_output[i + SHUNT]));
+    }
 }

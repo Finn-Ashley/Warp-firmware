@@ -67,6 +67,7 @@
 #include "devSSD1331.h"
 #include "devADC.h"
 
+
 volatile WarpSPIDeviceState			deviceSSD1331State;
 
 volatile spi_master_state_t				spiMasterState;
@@ -82,7 +83,7 @@ uint8_t							gWarpSpiCommonSourceBuffer[kWarpMemoryCommonSpiBufferBytes];
 uint8_t							gWarpSpiCommonSinkBuffer[kWarpMemoryCommonSpiBufferBytes];
 volatile uint32_t					gWarpSpiTimeoutMicroseconds		= kWarpDefaultSpiTimeoutMicroseconds;
 volatile uint32_t					gWarpSpiBaudRateKbps			= kWarpDefaultSpiBaudRateKbps;
-// char							gWarpPrintBuffer[kWarpDefaultPrintBufferSizeBytes];
+char							gWarpPrintBuffer[kWarpDefaultPrintBufferSizeBytes];
 
 static void						lowPowerPinStates(void);
 
@@ -281,7 +282,7 @@ main(void)
 	 */
 	CLOCK_SYS_UpdateConfiguration(CLOCK_CONFIG_INDEX_FOR_VLPR, kClockManagerPolicyForcible);
 
-	POWER_SYS_SetMode(0, kPowerManagerPolicyAgreement);
+	// POWER_SYS_SetMode(0, kPowerManagerPolicyAgreement);
 
 	/*
 	 *	Initialize the GPIO pins with the appropriate pull-up, etc.,
@@ -313,23 +314,68 @@ main(void)
 	gWarpBooted = true;
 
 	float complex fft_output[NUMBER_OF_STORED_READINGS];
-	float frequency_powers[NUMBER_OF_FREQS];
+	float frequency_powers[NUMBER_OF_FREQS - IGNORED_FREQS];
+
 
     ADCinit();
+
+	#if DEBUG
+		int32_t adc_value;
+		while(1){
+			adc_value = read_from_adc();
+			warpPrint("%u\n", adc_value);
+		}
+	#endif
+
 	devSSD1331init();
+	chart_calibration(adc_readings, fft_output, frequency_powers);
 
     while(1){
 
 		ADC_burn_in();
 		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
-
-		// first two components often noisy and dominating
-        for(int i = IGNORED_FREQS; i < NUMBER_OF_FREQS; i++){
-			frequency_powers[i] = (creal(fft_output[i])*creal(fft_output[i]) + cimag(fft_output[i])*cimag(fft_output[i]));
-        }
-
+		process_powers(fft_output, frequency_powers);
 		draw_frequency_chart(frequency_powers);
 
     }
 
 }
+
+#if DEBUG
+void
+warpPrint(const char *fmt, ...)
+{
+	int	fmtlen;
+	va_list	arg;
+
+	/*
+	 *	We use an ifdef rather than a C if to allow us to compile-out
+	 *	all references to SEGGER_RTT_*printf if we don't want them.
+	 *
+	 *	NOTE: SEGGER_RTT_vprintf takes a va_list* rather than a va_list
+	 *	like usual vprintf. We modify the SEGGER_RTT_vprintf so that it
+	 *	also takes our print buffer which we will eventually send over
+	 *	BLE. Using SEGGER_RTT_vprintf() versus the libc vsnprintf saves
+	 *	2kB flash and removes the use of malloc so we can keep heap
+	 *	allocation to zero.
+	 */
+	#if (WARP_BUILD_ENABLE_SEGGER_RTT_PRINTF)
+		/*
+		 *	We can't use SEGGER_RTT_vprintf to format into a buffer
+		 *	since SEGGER_RTT_vprintf formats directly into the special
+		 *	RTT memory region to be picked up by the RTT / SWD mechanism...
+		 */
+		va_start(arg, fmt);
+		fmtlen = SEGGER_RTT_vprintf(0, fmt, &arg, gWarpPrintBuffer, kWarpDefaultPrintBufferSizeBytes);
+		va_end(arg);
+
+		if (fmtlen < 0)
+		{
+			SEGGER_RTT_WriteString(0, gWarpEfmt);
+			return;
+		}
+	#endif
+
+	return;
+}
+#endif

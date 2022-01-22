@@ -4,7 +4,8 @@
 
 int	devSSD1331init(void);
 void draw_frequency_chart(float *bar_heights);
-void draw_frequency_bar(int start, int end, int height, int colour);
+void draw_frequency_bar(uint8_t start, uint8_t end, uint8_t height, uint8_t colour);
+void chart_calibration(int *adc_readings, float complex *fft_output, float *frequency_powers);
 typedef enum
 {
 	kSSD1331ColororderRGB		= 1,
@@ -43,4 +44,11 @@ typedef enum
 	kSSD1331CommandPRECHARGEC	= 0x8C,
 	kSSD1331CommandPRECHARGELEVEL	= 0xBB,
 	kSSD1331CommandVCOMH		= 0xBE,
+	RED = 0,
+	GREEN = 1,
+	BLUE = 2,
+	PURPLE = 3,
+	YELLOW = 4,
+	ORANGE = 5
+	
 } SSD1331Commands;

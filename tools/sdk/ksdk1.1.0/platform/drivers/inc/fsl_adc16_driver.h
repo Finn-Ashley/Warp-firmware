@@ -34,6 +34,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "fsl_adc16_hal.h"
+#include "/home/students/fwa20/Warp-firmware/tools/sdk/ksdk1.1.0/platform/CMSIS/Include/device/MKL03Z4/MKL03Z4_features.h"
+
 
 /*!
  * @addtogroup adc16_driver

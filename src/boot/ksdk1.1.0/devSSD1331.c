@@ -17,11 +17,14 @@
 #include "devADC.h"
 #include "fft.h"
 
+#define SPLASH_SCREEN 1
+
 
 volatile uint8_t	inBuffer[1];
 volatile uint8_t	payloadBytes[1];
-int bin_width;
-int max;
+float stats[6][2];
+uint8_t nBins = 6;
+uint8_t bin_width;
 
 /*
  *	Override Warp firmware's use of these pins and define new aliases.
@@ -161,34 +164,53 @@ devSSD1331init(void)
 	/*
 	 *	Any post-initialization drawing commands go here.
 	 */
-	bin_width = 0x5F / (NUMBER_OF_FREQS - IGNORED_FREQS);
-	max = 0;
+	bin_width = 0x5F / nBins;
 
-	#if DRAW_RECT
-	// draw rectangle
-	writeCommand(kSSD1331CommandDRAWRECT);
+	#if SPLASH_SCREEN
+		// draw rectangle
+		writeCommand(kSSD1331CommandDRAWRECT);
 
-	// set start and end row and column
-	writeCommand(0x00);
-	writeCommand(0x00);
-	writeCommand(0x5F); // col max
-	writeCommand(0x3F); // row max
+		// set start and end row and column
+		writeCommand(0x00);
+		writeCommand(0x00);
+		writeCommand(0x5F); // col max
+		writeCommand(0x3F); // row max
 
-	// set outline colour
-	writeCommand(0x00);
-	writeCommand(0xFF);
-	writeCommand(0x00);
+		// set outline colour
+		writeCommand(0x00);
+		writeCommand(0xFF);
+		writeCommand(0x00);
 
-	// set fill colour
-	writeCommand(0xFF);
-	writeCommand(0x00);
-	writeCommand(0x00);
+		// set fill colour
+		writeCommand(0xFF);
+		writeCommand(0x00);
+		writeCommand(0x00);
 	#endif
 
 	return 0;
 }
 
-void draw_frequency_bar(int start, int end, int height, int colour){
+void chart_calibration(int *adc_readings, float complex *fft_output, float *frequency_powers){
+	float tmp[2] = {0,0};
+
+	// take two readings for the each place so that we can run continously after this
+	for(uint8_t i = 0; i < nBins; i++){
+		ADC_burn_in();
+		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
+		process_powers(fft_output, frequency_powers);
+		tmp[0] = frequency_powers[i];
+
+		ADC_burn_in();
+		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
+		process_powers(fft_output, frequency_powers);
+		tmp[1] = frequency_powers[i];
+
+		stats[i][0] = min(tmp[0], tmp[1]);
+		stats[i][1] = max(tmp[0], tmp[1]);
+	}
+}
+
+void draw_frequency_bar(uint8_t start, uint8_t end, uint8_t height, uint8_t colour){
 	// set start and end row and column
 
 	writeCommand(kSSD1331CommandDRAWRECT);
@@ -203,69 +225,59 @@ void draw_frequency_bar(int start, int end, int height, int colour){
 	writeCommand(0xFF);
 
 	// set fill colour - could pass in a struct containing all values, but
-	// would be memory intensive for all bars and close to stack limit.
+	// would be memory intensive for all bars and we are close to stack limit.
 	// Sacrifice MCU cycles instead.
 	switch(colour){
 
 		// red
-		case 1:
+		case RED:
 			writeCommand(0xFF);
 			writeCommand(0x00);
 			writeCommand(0x00);
 			break;
 
 		// green
-		case 2:
+		case GREEN:
 			writeCommand(0x00);
 			writeCommand(0xFF);
 			writeCommand(0x00);
 			break;
 
 		// blue
-		case 3:
+		case BLUE:
 			writeCommand(0x00);
 			writeCommand(0x00);
 			writeCommand(0xFF);
 			break;
 
 		// purple
-		case 4:
+		case PURPLE:
 			writeCommand(0xA0);
 			writeCommand(0x20);
 			writeCommand(0xF0);
 			break;
 
 		// yellow
-		case 5:
+		case YELLOW:
 			writeCommand(0xFF);
 			writeCommand(0xFF);
 			writeCommand(0x00);
 			break;
 
-		// yellow
-		case 6:
+		// orange
+		case ORANGE:
 			writeCommand(0xFF);
 			writeCommand(0xA5);
 			writeCommand(0x00);
 			break;
 	}
 	
-
-	
 }
 
 void draw_frequency_chart(float *bar_heights){
 
-	int normalised_height, start, end;
-	float height;
+	uint8_t normalised_height, start, end;
 	
-	for (int c = IGNORED_FREQS; c < NUMBER_OF_FREQS; c++){
-		height = bar_heights[c];
-        if (height > max){
-        	max = height;
-		}
-    }
-
 	// clear screen before redrawing
 	writeCommand(kSSD1331CommandCLEAR);
 	writeCommand(0x00);
@@ -274,13 +286,20 @@ void draw_frequency_chart(float *bar_heights){
 	writeCommand(0x3F);
 
 	// draw chart
-	for(int i = IGNORED_FREQS; i < NUMBER_OF_FREQS; i++){
+	for(uint8_t i = 0; i < nBins; i++){
 
-		normalised_height = (bar_heights[i]/max)*(0x3F);
+        if (bar_heights[i] > stats[i][1]){
+        	stats[i][1] = bar_heights[i];
+		}
+		else if (bar_heights[i] < stats[i][0]){
+			stats[i][0] = bar_heights[i];
+		}
 
-		start = (i - IGNORED_FREQS) * bin_width;
+		normalised_height = (bar_heights[i] - stats[i][0])/(stats[i][1]-stats[i][0])*(0x3F);
+
+		start = i * bin_width;
 		end = start + bin_width;
 
-		draw_frequency_bar(start, end, normalised_height, i - 1);
+		draw_frequency_bar(start, end, normalised_height, i);
 	}
  }

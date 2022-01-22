@@ -35,6 +35,8 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "fsl_device_registers.h"
+#include "/home/students/fwa20/Warp-firmware/tools/sdk/ksdk1.1.0/platform/CMSIS/Include/device/MKL03Z4/MKL03Z4_features.h"
+
 
 /*!
  * @addtogroup adc16_hal

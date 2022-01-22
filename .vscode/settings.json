@@ -3,6 +3,8 @@
         "fsl_os_abstraction.h": "c",
         "complex.h": "c",
         "config.h": "c",
-        "fft.h": "c"
+        "fft.h": "c",
+        "warp.h": "c",
+        "devadc.h": "c"
     }
 }
