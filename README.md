@@ -1,3 +1,24 @@
+# Music Visualiser for 4B25 CW5
+## Finn Ashley, fwa20, Gonville & Caius College
+
+This reposistory contains an implementation for a music visualiser, operating on the NXP FRDM KL03 evaluation board equipped with an SSD1331 OLED screen and microphone input to the ADC. On boot up, the hardware will configure itself before dynamically splitting up incoming audio into 6 frequency bins online. These will be shown as an evolving chart on the OLED screen, where each bar will correspond to different frequency depending on the sampling frequency specified in the firmware.
+
+The codebase is built off of the Warp firmware, which this repository is forked off of. This program was severly memory constrained due to the need to store sampled audio values and perform intensive calculations on them, and as such the Warp firmware had to be stripped down signficantly - code for un-needed components on the freedom board was removed, and the more 'investigative' warp capabilities were removed in order to capitalise on their space. Relative to previous courseworks, the following files have been altered or added:
+
+* `boot.c` has been significantly simplifed, with the main loop now repeatedly calling a small set of functions that lay out the steps needed to perform frequecny decomposition.
+* `fft.c` has been added. This contains the simplest implementation of the FFT, which is therefore low memory. Credit goes to https://github.com/brendanashworth/fft-small for this, which was added to this project as allowed under their MIT license. Extra code was added to this in order to deal with the complex output of a real FFT.
+* `devADC.c` has been added. This contains functions to set up the board's ADC and start taking readings continously. This assumes an analogue audio input is connected to pin PTB1 on the FRDM board.
+* `devSSD1331.c` has been altered. Code to draw a green square has been removed, and replaced with a number of methods that are utilised to draw a frequency chart on the OLED screen. This includes code to dynamically scale the bars in order to keep then interesting.
+
+## Running
+
+Having been built off of Warp, getting the code running is relatively simple. Simply clone the reposistory with `git clone https://github.com/Finn-Ashley/Warp-firmware/` and navigate into it with a terminal.
+
+Subsequently call `make warp` and copy the resulting file at `build/ksdk1.1/work/demos/Warp/armgcc/Warp/release/Warp.srec` onto your board using the appropriate JLINK tools. This process is extensively detailed below, such that only a brief explanation has been provided here.
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 # Baseline firmware for the [Warp](https://github.com/physical-computation/Warp-hardware) family of hardware platforms
 This is the firmware for the [Warp hardware](https://github.com/physical-computation/Warp-hardware) and its publicly available and unpublished derivatives. This firmware also runs on the Freescale/NXP FRDM KL03 evaluation board which we use for teaching at the University of Cambridge. When running on platforms other than Warp, only the sensors available in the corresponding hardware platform are accessible.
 
