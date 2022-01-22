@@ -1,5 +1,6 @@
 /* Fast Fourier Transform
  * Cooley-Tukey algorithm with 2-radix DFT
+ * Low memory embedded implementation from: https://github.com/brendanashworth/fft-small
  */
 
 #include <complex.h>
@@ -34,6 +35,10 @@ void fft(int* x, float complex* X, unsigned int N) {
     fft_radix2(x, X, N, 1);
 }
 
+/*
+ * Takes magnitude of FFT complex returns to find 'quantity' of each
+ * frequency bin. Added by myself for program needs.
+ */
 void process_powers(float complex *fft_output, float *frequency_powers){
     for(uint8_t i = 0; i < NUMBER_OF_FREQS - IGNORED_FREQS; i++){
 			

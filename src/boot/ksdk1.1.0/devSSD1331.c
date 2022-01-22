@@ -191,27 +191,28 @@ devSSD1331init(void)
 }
 
 void chart_calibration(int *adc_readings, float complex *fft_output, float *frequency_powers){
+	// temporary array to store the two reads for each freq. bin
 	float tmp[2] = {0,0};
 
 	// take two readings for the each place so that we can run continously after this
+	// gives values to comapre against in the draw_frequency_chart function
 	for(uint8_t i = 0; i < nBins; i++){
-		ADC_burn_in();
+		ADC_read_set(0);
 		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
 		process_powers(fft_output, frequency_powers);
 		tmp[0] = frequency_powers[i];
 
-		ADC_burn_in();
+		ADC_read_set(0);
 		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
 		process_powers(fft_output, frequency_powers);
 		tmp[1] = frequency_powers[i];
 
-		stats[i][0] = min(tmp[0], tmp[1]);
-		stats[i][1] = max(tmp[0], tmp[1]);
+		stats[i][0] = min(tmp[0], tmp[1]); // min value for ith bin
+		stats[i][1] = max(tmp[0], tmp[1]); // max value for ith bin
 	}
 }
 
 void draw_frequency_bar(uint8_t start, uint8_t end, uint8_t height, uint8_t colour){
-	// set start and end row and column
 
 	writeCommand(kSSD1331CommandDRAWRECT);
 	writeCommand(start); // start col
@@ -276,6 +277,7 @@ void draw_frequency_bar(uint8_t start, uint8_t end, uint8_t height, uint8_t colo
 
 void draw_frequency_chart(float *bar_heights){
 
+	// innit vars
 	uint8_t normalised_height, start, end;
 	
 	// clear screen before redrawing
@@ -285,21 +287,39 @@ void draw_frequency_chart(float *bar_heights){
 	writeCommand(0x5F);
 	writeCommand(0x3F);
 
-	// draw chart
+	// draw chart - loop through each bar that needs to be created
 	for(uint8_t i = 0; i < nBins; i++){
 
+		/*  check if new min / max found with decays - these stop
+			one erroneous large value from permenatly affecting the
+			scaling for a chart so that it looks small, with it
+			decaying to lower bounds if no other large values. */
+
         if (bar_heights[i] > stats[i][1]){
+
+			// new max found - replace and upscale the minimum
         	stats[i][1] = bar_heights[i];
+			stats[i][0] *= 1.2;
 		}
 		else if (bar_heights[i] < stats[i][0]){
+			// new min found - replace and downscale the max
 			stats[i][0] = bar_heights[i];
+			stats[i][1] *= 0.8;
+		}
+		else{
+			// value sits in middle - scales current bounds inwards
+			stats[i][0] *= 1.2;
+			stats[i][1] *= 0.8;
 		}
 
+		// scale bars to fit on display and have interesting dynamics
 		normalised_height = (bar_heights[i] - stats[i][0])/(stats[i][1]-stats[i][0])*(0x3F);
 
+		// calculate bar 'coordinates'
 		start = i * bin_width;
 		end = start + bin_width;
 
+		// call drawing routine
 		draw_frequency_bar(start, end, normalised_height, i);
 	}
  }

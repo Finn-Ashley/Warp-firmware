@@ -194,9 +194,7 @@ lowPowerPinStates(void)
 		PORT_HAL_SetMuxMode(PORTB_BASE, 13, kPortPinDisabled);
 	}
 
-int
-main(void)
-{
+void warpStart(void){
 	rtc_datetime_t				warpBootDate;
 
 	/*
@@ -313,12 +311,25 @@ main(void)
 	 */
 	gWarpBooted = true;
 
+}
+
+int
+main(void)
+{
+	// call function that performs misc warp start-up operations
+	// simply for readablabilit
+	warpStart();
+
+	// intialise variables for FFT
 	float complex fft_output[NUMBER_OF_STORED_READINGS];
 	float frequency_powers[NUMBER_OF_FREQS - IGNORED_FREQS];
 
-
+	// start ADC continously converting
     ADCinit();
 
+	// debug routine allowing checking of ADC
+	// e.g. check known voltage and ground give
+	// consisten values
 	#if DEBUG
 		int32_t adc_value;
 		while(1){
@@ -327,12 +338,16 @@ main(void)
 		}
 	#endif
 
+	// intialise OLED screen and take intial readings for chart scaling
+	// baseline
 	devSSD1331init();
 	chart_calibration(adc_readings, fft_output, frequency_powers);
 
+	// main program loop
     while(1){
 
-		ADC_burn_in();
+		// sequentially take 
+		ADC_read_set(0);
 		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
 		process_powers(fft_output, frequency_powers);
 		draw_frequency_chart(frequency_powers);
@@ -341,6 +356,8 @@ main(void)
 
 }
 
+// need warp print if in debug mode so can output ADC values
+// including if not in debug causes silent stack overflow
 #if DEBUG
 void
 warpPrint(const char *fmt, ...)

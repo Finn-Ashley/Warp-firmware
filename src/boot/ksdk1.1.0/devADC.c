@@ -26,6 +26,11 @@ const uint8_t chn = 8U;
 
 int adc_readings[NUMBER_OF_STORED_READINGS];
 
+/*
+ * Intialise the ADC as defined in SDK, and set
+ * set running in continous conversion mode
+ * so can access new reading when desired.
+ */
 void ADCinit(void)
 {
 
@@ -55,7 +60,7 @@ void ADCinit(void)
     ADC16_DRV_ConfigConvChn(instance, chnGroup, &MyChnConfig);
 
 
-    ADC_burn_in();
+    ADC_read_set(0);
 }
 
 /*
@@ -70,33 +75,22 @@ int32_t read_from_adc(void){
 }
 
 /*
- * Prepopulate the ADC data array with a full set of readings.
- * Separates out fetching new data after this point which will require
- * looping round and overwriting old data.
+ * Populate the ADC data array with a full set of readings.
+ * Option to add in a delay between readings if desired so
+ * sampling frequency isn't based on ADC speed.
  */
 
-void ADC_burn_in(void){
+void ADC_read_set(bool delay){
 
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
-        // wait for and fetch conversion
+        // wait for and fetch conversion - int conversion for explicitness
+        // only since this board uses int = int32_t
         adc_readings[i] = (int)read_from_adc();
 
-        // OSA_TimeDelay(SAMPLING_PERIOD);
+        // if want more control over sampling period, necessary
+        // for explicit frequency bin calculations
+        if (delay){
+            OSA_TimeDelay(SAMPLING_PERIOD);
+        }
     }
-}
-
-/*
- * Fetches new data point from ADC and overwrites the oldest prior point to store.
- */
-void update_adc_data(void){
-    // I want this to fetch the latest ADC value, convert it and then put it in 
-    // into some array of fixed length, overwriting oldest data value if full
-
-    // shift data in array left by one to free up most recent datapoint
-    for(int i = 0; i < NUMBER_OF_STORED_READINGS - 2; i++){
-        adc_readings[i] = adc_readings[i+1];
-    }
-
-    // add in new datapoint
-    adc_readings[NUMBER_OF_STORED_READINGS - 1] = (int)read_from_adc();
 }

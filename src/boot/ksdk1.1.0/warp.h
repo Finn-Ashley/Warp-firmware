@@ -110,6 +110,7 @@ typedef struct
 WarpStatus	warpSetLowPowerMode(WarpPowerMode powerMode, uint32_t sleepSeconds);
 void		warpEnableSPIpins(void);
 void		warpDeasserAllSPIchipSelects(void);
+void 		warpStart(void);
 
 #if DEBUG
 void		warpPrint(const char *fmt, ...);
