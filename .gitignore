@@ -5,3 +5,4 @@ tools/scripts/warp.jlink.commands
 tools/scripts/glaux.jlink.commands
 settings.json
 vscode/
+./vscode
