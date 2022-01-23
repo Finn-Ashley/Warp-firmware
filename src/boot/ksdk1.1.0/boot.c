@@ -330,7 +330,7 @@ main(void)
 	// debug routine allowing checking of ADC
 	// e.g. check known voltage and ground give
 	// consisten values
-	#if DEBUG
+	#if DEBUG_LOOP
 		int32_t adc_value;
 		while(1){
 			adc_value = read_from_adc();
@@ -346,7 +346,7 @@ main(void)
 	// main program loop
     while(1){
 
-		// sequentially take 
+		// sequentially take
 		ADC_read_set(0);
 		fft(adc_readings, fft_output, NUMBER_OF_STORED_READINGS);
 		process_powers(fft_output, frequency_powers);

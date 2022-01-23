@@ -299,16 +299,16 @@ void draw_frequency_chart(float *bar_heights){
 
 			// new max found - replace and upscale the minimum
         	stats[i][1] = bar_heights[i];
-			stats[i][0] *= 1.2;
+			stats[i][0] *= 1.1;
 		}
 		else if (bar_heights[i] < stats[i][0]){
 			// new min found - replace and downscale the max
 			stats[i][0] = bar_heights[i];
-			stats[i][1] *= 0.8;
+			stats[i][1] *= 0.9;
 		}
 		else{
 			// value sits in middle - scales current bounds inwards
-			stats[i][0] *= 1.2;
+			stats[i][0] *= 1.1;
 			stats[i][1] *= 0.8;
 		}
 
