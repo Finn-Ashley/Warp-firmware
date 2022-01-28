@@ -3,14 +3,31 @@
 
 This reposistory contains an implementation for a music visualiser, operating on the NXP FRDM KL03 evaluation board equipped with an SSD1331 OLED screen and microphone input to the ADC. On boot up, the hardware will configure itself before dynamically splitting up incoming audio into 6 frequency bins online. These will be shown as an evolving chart on the OLED screen, where each bar will correspond to different frequency depending on the sampling frequency specified in the firmware.
 
-The codebase is built off of the Warp firmware, which this repository is forked off of. This program was severly memory constrained due to the need to store sampled audio values and perform intensive calculations on them, and as such the Warp firmware had to be stripped down signficantly - code for un-needed components on the freedom board was removed, and the more 'investigative' warp capabilities were removed in order to capitalise on their space. Relative to previous courseworks, the following files have been altered or added:
+The codebase is built off of the Warp firmware, which this repository is forked off of. This program was severely memory constrained due to the need to store sampled audio values and perform intensive calculations on them, and as such the Warp firmware had to be stripped down signficantly - code for un-needed components on the freedom board was removed, and the more 'investigative' warp capabilities were removed in order to capitalise on their space. Relative to previous courseworks, the following files have been altered or added:
 
 * `boot.c` has been significantly simplifed, with the main loop now repeatedly calling a small set of functions that lay out the steps needed to perform frequecny decomposition.
 * `fft.c` has been added. This contains the simplest implementation of the FFT, which is therefore low memory. Credit goes to https://github.com/brendanashworth/fft-small for this, which was added to this project as allowed under their MIT license. Extra code was added to this in order to deal with the complex output of a real FFT.
 * `devADC.c` has been added. This contains functions to set up the board's ADC and start taking readings continously. This assumes an analogue audio input is connected to pin PTB1 on the FRDM board.
 * `devSSD1331.c` has been altered. Code to draw a green square has been removed, and replaced with a number of methods that are utilised to draw a frequency chart on the OLED screen. This includes code to dynamically scale the bars in order to keep then interesting.
 
+## Operation
+
+The software functionality can be described through the functions called in the main loop:
+
+* `warpStart` calls all the initialising functions that haven't been cut out. This includes setting up pins, power modes among other things.
+* `ADCinit` configures the ADC with our desired level of accuracy and starts 'continuous conversion' mode. This means repeatedly samples from the microphone such that a new value will be available when we perform a read.
+* `devSSD1331init` does as in previous courseworks - sends the OLED screen all the initial commands needed before graphics commands can be processed.
+* `chart_calibration` sets up the data structures needed before frequency charts can be repeatedly drawn. In the chart drawing function, we track the minimum and maximum value seen for each frequency bin such that we can dynamically scale the bars in order to keep them interesting. This calibration function populates the min /max data structures through two initial reads such that there is a baseline to compare against.
+* `ADC_read_set` populates the ADC sample buffer through 16 reads.
+* `fft` takes these values and performs a real FFT on them, giving a size 8 complex output.
+* `process_powers` takes the magnitude of each of these, but only taking the central bins, as the first and last bins are quite noisy and contain unwanted components.
+* `draw_frequency_chart` takes these magnitudes and recursively draws scaled bars to represent the amount of each frequency.
+
 ## Running
+
+<img width="197" alt="schematic" src="https://user-images.githubusercontent.com/14968307/151530382-82f9a652-0234-4626-bd9c-e48990ec9d36.png">
+
+Connect the board up as above. The microphone package I have used is: https://www.adafruit.com/product/1063.
 
 Having been built off of Warp, getting the code running is relatively simple. Simply clone the reposistory with `git clone https://github.com/Finn-Ashley/Warp-firmware/` and navigate into it with a terminal.
 
