@@ -25,7 +25,9 @@ The software functionality can be described through the functions called in the 
 
 ## Running
 
-PHOTO OF CONFIG
+<img width="197" alt="schematic" src="https://user-images.githubusercontent.com/14968307/151530382-82f9a652-0234-4626-bd9c-e48990ec9d36.png">
+
+Connect the board up as above. The microphone package I have used is: https://www.adafruit.com/product/1063.
 
 Having been built off of Warp, getting the code running is relatively simple. Simply clone the reposistory with `git clone https://github.com/Finn-Ashley/Warp-firmware/` and navigate into it with a terminal.
 
