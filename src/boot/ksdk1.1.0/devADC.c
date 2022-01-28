@@ -22,7 +22,7 @@ const uint32_t instance = 0U;
 const uint32_t chnGroup = 0U;
 const uint8_t chn = 8U;
 
-uint32_t adc_readings[NUMBER_OF_STORED_READINGS];
+int adc_readings[NUMBER_OF_STORED_READINGS];
 
 /*
  * Intialise the ADC as defined in SDK, and
@@ -82,7 +82,7 @@ void ADC_read_set(bool delay){
 
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
         // wait for and fetch conversion
-        adc_readings[i] = read_from_adc();
+        adc_readings[i] = (int)read_from_adc();
 
         // if want more control over sampling period, necessary
         // for explicit frequency bin calculations

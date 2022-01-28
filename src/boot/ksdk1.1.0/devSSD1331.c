@@ -294,26 +294,26 @@ void draw_frequency_chart(float *bar_heights){
 			one erroneous large value from permenatly affecting the
 			scaling for a chart so that it looks small, with it
 			decaying to lower bounds if no other large values. */
-
+		
         if (bar_heights[i] > stats[i][1]){
 
 			// new max found - replace and upscale the minimum
         	stats[i][1] = bar_heights[i];
-			stats[i][0] *= 1.1;
+			stats[i][0] *= 1.01;
 		}
 		else if (bar_heights[i] < stats[i][0]){
 			// new min found - replace and downscale the max
 			stats[i][0] = bar_heights[i];
-			stats[i][1] *= 0.9;
+			stats[i][1] *= 0.99;
 		}
 		else{
 			// value sits in middle - scales current bounds inwards
-			stats[i][0] *= 1.1;
-			stats[i][1] *= 0.8;
+			stats[i][0] *= 1.01;
+			stats[i][1] *= 0.99;
 		}
 
 		// scale bars to fit on display and have interesting dynamics
-		normalised_height = (bar_heights[i] - stats[i][0])/(stats[i][1]-stats[i][0])*(0x3F);
+		normalised_height = ((bar_heights[i] - stats[i][0])/(stats[i][1]))*(0x3F);
 
 		// calculate bar 'coordinates'
 		start = i * bin_width;

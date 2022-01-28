@@ -10,4 +10,4 @@ void ADCinit(void);
 int32_t read_from_adc(void);
 void ADC_read_set(bool delay);
 
-extern uint32_t adc_readings[NUMBER_OF_STORED_READINGS];
+extern int adc_readings[NUMBER_OF_STORED_READINGS];
