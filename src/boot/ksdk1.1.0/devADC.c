@@ -18,16 +18,14 @@
 #include "fsl_adc16_driver.h"
 #include "fsl_adc16_hal.h"
 
-//#include "/home/students/fwa20/Warp-firmware/tools/sdk/ksdk1.1.0/platform/CMSIS/Include/device/MKL03Z4/MKL03Z4_features.h"
-
 const uint32_t instance = 0U;
 const uint32_t chnGroup = 0U;
 const uint8_t chn = 8U;
 
-int adc_readings[NUMBER_OF_STORED_READINGS];
+uint32_t adc_readings[NUMBER_OF_STORED_READINGS];
 
 /*
- * Intialise the ADC as defined in SDK, and set
+ * Intialise the ADC as defined in SDK, and
  * set running in continous conversion mode
  * so can access new reading when desired.
  */
@@ -83,9 +81,8 @@ int32_t read_from_adc(void){
 void ADC_read_set(bool delay){
 
     for(int i = 0; i < NUMBER_OF_STORED_READINGS; i++){
-        // wait for and fetch conversion - int conversion for explicitness
-        // only since this board uses int = int32_t
-        adc_readings[i] = (int)read_from_adc();
+        // wait for and fetch conversion
+        adc_readings[i] = read_from_adc();
 
         // if want more control over sampling period, necessary
         // for explicit frequency bin calculations
