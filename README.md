@@ -5,7 +5,7 @@ This reposistory contains an implementation for a music visualiser, operating on
 
 The codebase is built off of the Warp firmware, which this repository is forked off of. This program was severely memory constrained due to the need to store sampled audio values and perform intensive calculations on them, and as such the Warp firmware had to be stripped down signficantly - code for un-needed components on the freedom board was removed, and the more 'investigative' warp capabilities were removed in order to capitalise on their space. Relative to previous courseworks, the following files have been altered or added:
 
-* `boot.c` has been significantly simplifed, with the main loop now repeatedly calling a small set of functions that lay out the steps needed to perform frequecny decomposition.
+* `boot.c` has been significantly simplifed, with the main loop now repeatedly calling a small set of functions that lay out the steps needed to perform frequency decomposition.
 * `fft.c` has been added. This contains the simplest implementation of the FFT, which is therefore low memory. Credit goes to https://github.com/brendanashworth/fft-small for this, which was added to this project as allowed under their MIT license. Extra code was added to this in order to deal with the complex output of a real FFT.
 * `devADC.c` has been added. This contains functions to set up the board's ADC and start taking readings continously. This assumes an analogue audio input is connected to pin PTB1 on the FRDM board.
 * `devSSD1331.c` has been altered. Code to draw a green square has been removed, and replaced with a number of methods that are utilised to draw a frequency chart on the OLED screen. This includes code to dynamically scale the bars in order to keep then interesting.
